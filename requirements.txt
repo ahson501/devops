@@ -1,0 +1,21 @@
+
+
+Here are some common DevOps tools that can be installed on Ubuntu 22.04:
+
+Git: a version control system used for tracking changes in source code and coordinating work among developers.
+
+Docker: a containerization platform that allows developers to package applications and their dependencies in lightweight, portable containers.
+
+Ansible: a configuration management and orchestration tool that helps automate the deployment and management of applications.
+
+Jenkins: an open-source continuous integration and delivery platform that can be used to automate the build, test, and deployment of applications.
+
+Kubernetes: an open-source container orchestration platform that helps automate the deployment, scaling, and management of containerized applications.
+
+Terraform: a tool for building, changing, and versioning infrastructure safely and efficiently.
+
+Nagios: an open-source monitoring tool that can be used to monitor servers, networking equipment, and other devices.
+
+Prometheus: an open-source monitoring and alerting system that helps collect and visualize metrics from various sources.
+
+Grafana: an open-source platform for analytics and monitoring that allows users to visualize and analyze data from various sources.
