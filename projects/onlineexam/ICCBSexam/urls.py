@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('teacher/',include('teacher.urls')),
     path('student/',include('student.urls')),
+    path('ICCBStickets', include('ICCBStickets.urls')),
     
     
     

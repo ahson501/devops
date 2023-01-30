@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Tickets{% endblock %}</title>
+  {% load static %}
+  <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+</head>
+<body>
+  <div class="header">
+    <a class="logo">ICCBS Help Desk</a>
+    <div class="header-right">
+      <a href="{% url 'index' %}" class=sel></a>
+      <a href="/admin/" class=sel>Admin Login</a>
+    </div>
+  </div>
+   <div id="body">
+   {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
