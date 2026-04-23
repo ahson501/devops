@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snmp-exporter-prometheus-snmp-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: prometheus-snmp-exporter
+    app.kubernetes.io/instance: snmp-exporter
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: prometheus-snmp-exporter
+    app.kubernetes.io/version: v0.30.0
+  annotations:
+    meta.helm.sh/release-name: snmp-exporter
+    meta.helm.sh/release-namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-snmp-exporter
+      app.kubernetes.io/instance: snmp-exporter
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus-snmp-exporter
+        app.kubernetes.io/instance: snmp-exporter
+        app.kubernetes.io/component: metrics
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/part-of: prometheus-snmp-exporter
+        app.kubernetes.io/version: v0.30.0
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2026-01-06T14:06:56+05:00"
+    spec:
+      serviceAccountName: snmp-exporter-prometheus-snmp-exporter
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: snmp-exporter
+        image: quay.io/prometheus/snmp-exporter:v0.30.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 9116
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        resources: {}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: snmp-config
+          mountPath: /etc/snmp_exporter
+          readOnly: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      volumes:
+      - name: snmp-config
+        configMap:
+          name: snmp-exporter-config

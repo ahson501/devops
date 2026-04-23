@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-gateway-router
+  namespace: ai-gateway
+data:
+  router.py: |
+    from fastapi import FastAPI, Request
+    import httpx
+    import os
+
+    app = FastAPI()
+
+    QWEN_URL = os.getenv("QWEN_URL")
+    DEEPSEEK_URL = os.getenv("DEEPSEEK_URL")
+    MISTRAL_URL = os.getenv("MISTRAL_URL")
+
+    CODING_KEYWORDS = os.getenv("CODING_KEYWORDS", "").split()
+    BIO_KEYWORDS = os.getenv("BIO_KEYWORDS", "").split()
+
+    def classify_prompt(prompt: str):
+
+        p = prompt.lower()
+
+        for word in CODING_KEYWORDS:
+            if word in p:
+                return "deepseek"
+
+        for word in BIO_KEYWORDS:
+            if word in p:
+                return "qwen"
+
+        return "mistral"
+
+
+    def get_target_url(model):
+
+        if model == "deepseek":
+            return DEEPSEEK_URL
+
+        if model == "qwen":
+            return QWEN_URL
+
+        return MISTRAL_URL
+
+
+    @app.get("/")
+    async def health():
+        return {"status": "ai-gateway-running"}
+
+
+    @app.post("/v1/chat/completions")
+    async def route(request: Request):
+
+        body = await request.json()
+
+        try:
+            prompt = body["messages"][-1]["content"]
+        except:
+            prompt = ""
+
+        model = classify_prompt(prompt)
+
+        target = get_target_url(model)
+
+        async with httpx.AsyncClient(timeout=300) as client:
+            response = await client.post(
+                f"{target}/v1/chat/completions",
+                json=body
+            )
+
+        return response.json()

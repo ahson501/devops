@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cisco-reboot-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  groups:
+  - name: cisco-reboot
+    rules:
+    - alert: CiscoSwitchReboot
+      expr: resets(sysUpTime[15m]) > 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Cisco switch reboot detected"
+        description: |
+          Switch {{ $labels.switch_name }} rebooted.
+          sysUpTime counter reset detected via SNMP.

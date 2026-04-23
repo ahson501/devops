@@ -1,0 +1,138 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: jhub
+      meta.helm.sh/release-namespace: iccbs
+      prometheus.io/path: /hub/metrics
+      prometheus.io/port: "8081"
+      prometheus.io/scrape: "true"
+    creationTimestamp: "2025-12-31T09:41:29Z"
+    labels:
+      app: jupyterhub
+      app.kubernetes.io/component: hub
+      app.kubernetes.io/instance: jhub
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: jupyterhub
+      chart: jupyterhub-4.3.2
+      component: hub
+      helm.sh/chart: jupyterhub-4.3.2
+      heritage: Helm
+      release: jhub
+    name: hub
+    namespace: iccbs
+    resourceVersion: "102690"
+    uid: f74c9222-f182-446d-a09d-5c806aa245ee
+  spec:
+    clusterIP: 10.109.60.68
+    clusterIPs:
+    - 10.109.60.68
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: PreferDualStack
+    ports:
+    - name: hub
+      port: 8081
+      protocol: TCP
+      targetPort: http
+    selector:
+      app: jupyterhub
+      component: hub
+      release: jhub
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: jhub
+      meta.helm.sh/release-namespace: iccbs
+    creationTimestamp: "2025-12-31T09:41:29Z"
+    labels:
+      app: jupyterhub
+      app.kubernetes.io/component: proxy-api
+      app.kubernetes.io/instance: jhub
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: jupyterhub
+      chart: jupyterhub-4.3.2
+      component: proxy-api
+      helm.sh/chart: jupyterhub-4.3.2
+      heritage: Helm
+      release: jhub
+    name: proxy-api
+    namespace: iccbs
+    resourceVersion: "102692"
+    uid: 99d8730f-e327-4406-aa2e-aa75ed8d4a85
+  spec:
+    clusterIP: 10.106.141.253
+    clusterIPs:
+    - 10.106.141.253
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: PreferDualStack
+    ports:
+    - port: 8001
+      protocol: TCP
+      targetPort: api
+    selector:
+      app: jupyterhub
+      component: proxy
+      release: jhub
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: jhub
+      meta.helm.sh/release-namespace: iccbs
+    creationTimestamp: "2025-12-31T09:41:29Z"
+    labels:
+      app: jupyterhub
+      app.kubernetes.io/component: proxy-public
+      app.kubernetes.io/instance: jhub
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: jupyterhub
+      chart: jupyterhub-4.3.2
+      component: proxy-public
+      helm.sh/chart: jupyterhub-4.3.2
+      heritage: Helm
+      release: jhub
+    name: proxy-public
+    namespace: iccbs
+    resourceVersion: "530530"
+    uid: 107cffa1-3b36-4bf1-a73c-8fecf4ddacff
+  spec:
+    clusterIP: 10.103.80.92
+    clusterIPs:
+    - 10.103.80.92
+    externalTrafficPolicy: Cluster
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: PreferDualStack
+    ports:
+    - name: http
+      nodePort: 32372
+      port: 80
+      protocol: TCP
+      targetPort: http
+    selector:
+      app: jupyterhub
+      component: proxy
+      release: jhub
+    sessionAffinity: None
+    type: NodePort
+  status:
+    loadBalancer: {}
+kind: List
+metadata:
+  resourceVersion: ""

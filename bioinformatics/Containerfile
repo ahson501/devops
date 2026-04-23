@@ -1,0 +1,102 @@
+# ==============================
+# Base image: NVIDIA CUDA + Ubuntu 22.04
+# ==============================
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
+
+# ==============================
+# Environment
+# ==============================
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CONDA_DIR=/opt/conda
+ENV PATH=/opt/conda/bin:/usr/local/bin:$PATH
+
+ARG NB_USER=iccbs
+ARG NB_UID=1000
+ARG NB_GID=100
+
+# ==============================
+# System dependencies
+# ==============================
+RUN sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list && \
+    sed -i 's|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y --no-install-recommends \
+        wget \
+        bzip2 \
+        ca-certificates \
+        git \
+        build-essential \
+        cmake \
+        libfftw3-dev \
+        libopenblas-dev \
+        liblapack-dev \
+        python3 \
+        python3-pip \
+        samtools \
+        bowtie2 \
+        bedtools \
+        fastqc \
+    && rm -rf /var/lib/apt/lists/*
+
+# ==============================
+# Install Miniconda
+# ==============================
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p ${CONDA_DIR} && \
+    rm /tmp/miniconda.sh && \
+    ${CONDA_DIR}/bin/conda config --set always_yes yes --set changeps1 no && \
+    ${CONDA_DIR}/bin/conda clean -ya
+
+# ==============================
+# *** FIX: Accept Anaconda TOS ***
+# ==============================
+RUN ${CONDA_DIR}/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    ${CONDA_DIR}/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+# ==============================
+# Install Jupyter (CONDA + PIP)
+# ==============================
+RUN ${CONDA_DIR}/bin/conda install \
+        notebook \
+        jupyterlab \
+        jupyterhub \
+    && ${CONDA_DIR}/bin/conda clean -ya
+
+RUN ${CONDA_DIR}/bin/pip install --no-cache-dir \
+        jupyterhub \
+        jupyterlab \
+        biopython \
+        pysam \
+        matplotlib \
+        seaborn \
+        scanpy \
+        anndata
+
+# Make jupyterhub-singleuser globally executable
+RUN ln -sf /opt/conda/bin/jupyterhub-singleuser /usr/local/bin/jupyterhub-singleuser && \
+    chmod +x /opt/conda/bin/jupyterhub-singleuser
+
+# ==============================
+# Create notebook user
+# ==============================
+RUN if ! getent group ${NB_GID} >/dev/null; then \
+        groupadd -g ${NB_GID} ${NB_USER}; \
+    fi && \
+    id -u ${NB_UID} >/dev/null 2>&1 || \
+        useradd -m -s /bin/bash -N -u ${NB_UID} -g ${NB_GID} ${NB_USER}
+
+# ==============================
+# Workspace + permissions
+# ==============================
+RUN mkdir -p /home/${NB_USER} /workspace /home/${NB_USER}/shared-datasets && \
+    chown -R ${NB_UID}:${NB_GID} \
+        /home/${NB_USER} \
+        /workspace \
+        /opt/conda
+
+# ==============================
+# REQUIRED (unchanged, as requested)
+# ==============================
+USER ${NB_UID}:${NB_GID}
+WORKDIR /home/iccbs
+
+CMD ["bash"]

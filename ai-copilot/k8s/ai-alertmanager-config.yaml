@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1beta1
+kind: AlertmanagerConfig
+metadata:
+  name: ai-copilot-config
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  route:
+    receiver: ai-copilot
+
+    groupBy: ["alertname", "severity"]
+
+    groupWait: 10s
+    groupInterval: 30s
+    repeatInterval: 1h
+
+    matchers:
+      - name: severity
+        matchType: "=~"
+        value: "critical|warning"
+  receivers:
+    - name: ai-copilot
+      webhookConfigs:
+        - url: http://ai-copilot.monitoring.svc.cluster.local:9000/alert
+          sendResolved: true

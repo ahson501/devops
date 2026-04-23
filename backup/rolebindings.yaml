@@ -1,0 +1,518 @@
+apiVersion: v1
+items:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: gpu-operator
+      meta.helm.sh/release-namespace: gpu-operator
+    creationTimestamp: "2025-12-31T04:31:27Z"
+    labels:
+      app.kubernetes.io/component: gpu-operator
+      app.kubernetes.io/instance: gpu-operator
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: gpu-operator
+      app.kubernetes.io/version: v25.10.1
+      helm.sh/chart: gpu-operator-v25.10.1
+    name: gpu-operator
+    namespace: gpu-operator
+    resourceVersion: "57390"
+    uid: 16eef0df-0f44-4679-a7bd-342eb61f8c65
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: gpu-operator
+  subjects:
+  - kind: ServiceAccount
+    name: gpu-operator
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: gpu-operator
+      meta.helm.sh/release-namespace: gpu-operator
+    creationTimestamp: "2025-12-31T04:31:27Z"
+    labels:
+      app.kubernetes.io/instance: gpu-operator
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: node-feature-discovery
+      app.kubernetes.io/version: v0.18.2
+      helm.sh/chart: node-feature-discovery-0.18.2
+    name: gpu-operator-node-feature-discovery-worker
+    namespace: gpu-operator
+    resourceVersion: "57389"
+    uid: d040336a-f433-4cbb-a68f-140c017f6ea3
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: gpu-operator-node-feature-discovery-worker
+  subjects:
+  - kind: ServiceAccount
+    name: node-feature-discovery
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-31T04:31:56Z"
+    name: nvidia-container-toolkit
+    namespace: gpu-operator
+    ownerReferences:
+    - apiVersion: nvidia.com/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ClusterPolicy
+      name: cluster-policy
+      uid: a05d713c-a262-41b7-b3a2-977853b40b5d
+    resourceVersion: "57555"
+    uid: 0b3b3871-c267-4849-8a2a-af1d2588bd62
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: nvidia-container-toolkit
+  subjects:
+  - kind: ServiceAccount
+    name: nvidia-container-toolkit
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2026-01-28T08:58:58Z"
+    labels:
+      app: nvidia-dcgm-exporter
+    name: nvidia-dcgm-exporter
+    namespace: gpu-operator
+    ownerReferences:
+    - apiVersion: nvidia.com/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ClusterPolicy
+      name: cluster-policy
+      uid: a05d713c-a262-41b7-b3a2-977853b40b5d
+    resourceVersion: "7416917"
+    uid: 2fdf679c-b29d-4f59-89be-3bbeb28ab4a2
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: nvidia-dcgm-exporter
+  subjects:
+  - kind: ServiceAccount
+    name: nvidia-dcgm-exporter
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-31T04:31:57Z"
+    name: nvidia-device-plugin
+    namespace: gpu-operator
+    ownerReferences:
+    - apiVersion: nvidia.com/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ClusterPolicy
+      name: cluster-policy
+      uid: a05d713c-a262-41b7-b3a2-977853b40b5d
+    resourceVersion: "57569"
+    uid: 20b44aae-6798-43a0-b0f4-e52cd8ef4d11
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: nvidia-device-plugin
+  subjects:
+  - kind: ServiceAccount
+    name: nvidia-device-plugin
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-31T04:31:58Z"
+    name: nvidia-device-plugin-mps-control-daemon
+    namespace: gpu-operator
+    ownerReferences:
+    - apiVersion: nvidia.com/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ClusterPolicy
+      name: cluster-policy
+      uid: a05d713c-a262-41b7-b3a2-977853b40b5d
+    resourceVersion: "57579"
+    uid: 3c7d8583-751a-4b80-8c6a-4752e746e745
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: nvidia-device-plugin-mps-control-daemon
+  subjects:
+  - kind: ServiceAccount
+    name: nvidia-device-plugin-mps-control-daemon
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-31T04:31:58Z"
+    name: nvidia-gpu-feature-discovery
+    namespace: gpu-operator
+    ownerReferences:
+    - apiVersion: nvidia.com/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ClusterPolicy
+      name: cluster-policy
+      uid: a05d713c-a262-41b7-b3a2-977853b40b5d
+    resourceVersion: "57591"
+    uid: 688a4392-ce0c-4971-9eaf-5dab17de5113
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: nvidia-gpu-feature-discovery
+  subjects:
+  - kind: ServiceAccount
+    name: nvidia-gpu-feature-discovery
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-31T04:31:57Z"
+    name: nvidia-operator-validator
+    namespace: gpu-operator
+    ownerReferences:
+    - apiVersion: nvidia.com/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ClusterPolicy
+      name: cluster-policy
+      uid: a05d713c-a262-41b7-b3a2-977853b40b5d
+    resourceVersion: "57562"
+    uid: c60a928f-5b6e-4fff-b34d-e2a6cfb4e2e9
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: nvidia-operator-validator
+  subjects:
+  - kind: ServiceAccount
+    name: nvidia-operator-validator
+    namespace: gpu-operator
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: jhub
+      meta.helm.sh/release-namespace: iccbs
+    creationTimestamp: "2025-12-31T09:41:29Z"
+    labels:
+      app: jupyterhub
+      app.kubernetes.io/component: hub
+      app.kubernetes.io/instance: jhub
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: jupyterhub
+      chart: jupyterhub-4.3.2
+      component: hub
+      helm.sh/chart: jupyterhub-4.3.2
+      heritage: Helm
+      release: jhub
+    name: hub
+    namespace: iccbs
+    resourceVersion: "102688"
+    uid: 2d275d8c-3a65-4e72-8a46-98d20a4d35fb
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: hub
+  subjects:
+  - kind: ServiceAccount
+    name: hub
+    namespace: iccbs
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    name: kubeadm:bootstrap-signer-clusterinfo
+    namespace: kube-public
+    resourceVersion: "260"
+    uid: 365302f6-d9ec-4426-8abb-4f0042e738d2
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: kubeadm:bootstrap-signer-clusterinfo
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:anonymous
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system:controller:bootstrap-signer
+    namespace: kube-public
+    resourceVersion: "237"
+    uid: 8191f567-e95b-4232-90d2-53106cdce26d
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: system:controller:bootstrap-signer
+  subjects:
+  - kind: ServiceAccount
+    name: bootstrap-signer
+    namespace: kube-system
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-30T16:14:40Z"
+    name: kube-proxy
+    namespace: kube-system
+    resourceVersion: "290"
+    uid: fc084769-e5c6-48e5-9df6-d725d2fc28d8
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: kube-proxy
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:bootstrappers:kubeadm:default-node-token
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    name: kubeadm:kubelet-config
+    namespace: kube-system
+    resourceVersion: "249"
+    uid: bc447488-69fc-487e-9c48-d393df46a23f
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: kubeadm:kubelet-config
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:nodes
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:bootstrappers:kubeadm:default-node-token
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    name: kubeadm:nodes-kubeadm-config
+    namespace: kube-system
+    resourceVersion: "246"
+    uid: 7b4b99f9-99fc-4ea1-8ca2-ba89e930820b
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: kubeadm:nodes-kubeadm-config
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:bootstrappers:kubeadm:default-node-token
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:nodes
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system::extension-apiserver-authentication-reader
+    namespace: kube-system
+    resourceVersion: "231"
+    uid: e8d1063e-03d7-47ee-b416-d7db82c143d0
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: extension-apiserver-authentication-reader
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:kube-controller-manager
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:kube-scheduler
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system::leader-locking-kube-controller-manager
+    namespace: kube-system
+    resourceVersion: "232"
+    uid: d4829560-c207-4af7-b3fc-de59475625dd
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: system::leader-locking-kube-controller-manager
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:kube-controller-manager
+  - kind: ServiceAccount
+    name: kube-controller-manager
+    namespace: kube-system
+  - kind: ServiceAccount
+    name: leader-election-controller
+    namespace: kube-system
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system::leader-locking-kube-scheduler
+    namespace: kube-system
+    resourceVersion: "233"
+    uid: 042249af-1af9-4097-9b22-cd11f2297539
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: system::leader-locking-kube-scheduler
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:kube-scheduler
+  - kind: ServiceAccount
+    name: kube-scheduler
+    namespace: kube-system
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system:controller:bootstrap-signer
+    namespace: kube-system
+    resourceVersion: "234"
+    uid: 3c991f6d-ea46-4d34-ad8e-44a2003ed0a6
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: system:controller:bootstrap-signer
+  subjects:
+  - kind: ServiceAccount
+    name: bootstrap-signer
+    namespace: kube-system
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system:controller:cloud-provider
+    namespace: kube-system
+    resourceVersion: "235"
+    uid: 0bf322ad-ad98-46c4-af6c-c38dc2c445c9
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: system:controller:cloud-provider
+  subjects:
+  - kind: ServiceAccount
+    name: cloud-provider
+    namespace: kube-system
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: "2025-12-30T16:14:05Z"
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: system:controller:token-cleaner
+    namespace: kube-system
+    resourceVersion: "236"
+    uid: 53033199-4ff7-4da4-83de-f4e29c743015
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: system:controller:token-cleaner
+  subjects:
+  - kind: ServiceAccount
+    name: token-cleaner
+    namespace: kube-system
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"rbac.authorization.k8s.io/v1","kind":"RoleBinding","metadata":{"annotations":{},"name":"local-path-provisioner-bind","namespace":"local-path-storage"},"roleRef":{"apiGroup":"rbac.authorization.k8s.io","kind":"Role","name":"local-path-provisioner-role"},"subjects":[{"kind":"ServiceAccount","name":"local-path-provisioner-service-account","namespace":"local-path-storage"}]}
+    creationTimestamp: "2025-12-31T06:24:48Z"
+    name: local-path-provisioner-bind
+    namespace: local-path-storage
+    resourceVersion: "74090"
+    uid: d9d34906-031e-4ff7-b8f5-fcad89de6d58
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: local-path-provisioner-role
+  subjects:
+  - kind: ServiceAccount
+    name: local-path-provisioner-service-account
+    namespace: local-path-storage
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: prometheus-stack
+      meta.helm.sh/release-namespace: monitoring
+    creationTimestamp: "2026-01-02T17:35:01Z"
+    labels:
+      app.kubernetes.io/instance: prometheus-stack
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: grafana
+      app.kubernetes.io/version: 12.3.1
+      helm.sh/chart: grafana-10.4.3
+    name: prometheus-stack-grafana
+    namespace: monitoring
+    resourceVersion: "656447"
+    uid: e6f1fd47-8298-4800-ab47-e53cdeabf0db
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: prometheus-stack-grafana
+  subjects:
+  - kind: ServiceAccount
+    name: prometheus-stack-grafana
+    namespace: monitoring
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: snmp-exporter
+      meta.helm.sh/release-namespace: monitoring
+    creationTimestamp: "2026-01-06T05:47:16Z"
+    labels:
+      app.kubernetes.io/component: metrics
+      app.kubernetes.io/instance: snmp-exporter
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: prometheus-snmp-exporter
+      app.kubernetes.io/part-of: prometheus-snmp-exporter
+      app.kubernetes.io/version: v0.30.0
+      helm.sh/chart: prometheus-snmp-exporter-9.10.0
+    name: snmp-exporter-prometheus-snmp-exporter
+    namespace: monitoring
+    resourceVersion: "1472892"
+    uid: 01583e22-235c-4e2b-8beb-afd94124e212
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: snmp-exporter-prometheus-snmp-exporter
+  subjects:
+  - kind: ServiceAccount
+    name: snmp-exporter-prometheus-snmp-exporter
+kind: List
+metadata:
+  resourceVersion: ""

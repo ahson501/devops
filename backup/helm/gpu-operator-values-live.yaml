@@ -1,0 +1,25 @@
+dcgmExporter:
+  arguments:
+  - -k
+  enabled: true
+  env:
+  - name: DCGM_EXPORTER_KUBERNETES
+    value: "true"
+  - name: DCGM_EXPORTER_KUBERNETES_GPU_ID_TYPE
+    value: uid
+  extraVolumeMounts:
+  - mountPath: /var/lib/kubelet/pod-resources
+    name: pod-resources
+    readOnly: true
+  extraVolumes:
+  - hostPath:
+      path: /var/lib/kubelet/pod-resources
+    name: pod-resources
+  kubeletPath: /var/lib/kubelet/pod-resources
+  serviceMonitor:
+    additionalLabels:
+      release: prometheus-stack
+    enabled: true
+    honorLabels: true
+operator:
+  defaultRuntime: containerd

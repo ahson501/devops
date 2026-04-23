@@ -1,0 +1,527 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"nfs-shared-data-pv"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"4Ti"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-23T17:58:22Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: nfs-shared-data-pv
+    resourceVersion: "6159173"
+    uid: a1d88fc7-0866-49bf-aa80-04843484891d
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 4Ti
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: jupyterhub-shared-data
+      namespace: iccbs
+      resourceVersion: "6159171"
+      uid: 18342a5b-fb05-49ad-999e-11ab2ded91bb
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-23T17:58:22Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-1"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-1","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:12:06Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-1
+    resourceVersion: "6887663"
+    uid: d88adba1-cb61-45e3-b71a-1713db24b262
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-1
+      namespace: iccbs
+      resourceVersion: "6842278"
+      uid: 44b4cbbb-5937-475e-8e64-de700185a04f
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-1
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:12:15Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-10"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-10","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:39Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-10
+    resourceVersion: "6894532"
+    uid: 19e82b02-9f03-43e7-80ff-9b77c2de8bb0
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-10
+      namespace: iccbs
+      resourceVersion: "6894421"
+      uid: 57eaab3e-f123-416c-a408-e6f5d808e96a
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-10
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:47:45Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-11"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-11","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:35Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-11
+    resourceVersion: "6894524"
+    uid: 3b51e7e0-a1e7-4dbf-a232-7554ed83e556
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-9
+      namespace: iccbs
+      resourceVersion: "6894402"
+      uid: 850f380c-1f93-412b-a44b-c39e6fac7e59
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-11
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:47:45Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-12"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-12","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:30Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-12
+    resourceVersion: "6894528"
+    uid: eb8db995-ef87-4b18-8395-df2794797312
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-8
+      namespace: iccbs
+      resourceVersion: "6894388"
+      uid: 5177d0a7-3589-4ef3-a61e-16d5ada65606
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-12
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:47:45Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-2"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-2","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T09:56:17Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-2
+    resourceVersion: "6884691"
+    uid: 00abd7e5-92ac-4f2e-af6f-1d75311648f4
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-4
+      namespace: iccbs
+      resourceVersion: "6842196"
+      uid: 42b39292-048b-45a0-ae79-130d611c8495
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-2
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T09:56:30Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-3"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-3","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:50:01Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-3
+    resourceVersion: "6895028"
+    uid: 3080b498-1023-456a-98a9-f88b2fc6e87d
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-6
+      namespace: iccbs
+      resourceVersion: "6894884"
+      uid: d3ca6f8f-2952-41e6-a160-12b8dd895e4c
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-3
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:50:15Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-4"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-4","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T07:29:45Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-4
+    resourceVersion: "6857019"
+    uid: d51df084-4799-4fd4-a8a6-fe0eb39f6f19
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-2
+      namespace: iccbs
+      resourceVersion: "6842251"
+      uid: 0a93d74f-f847-4667-aca2-5fa44d37fca6
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-4
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T07:29:59Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-5"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-5","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T07:23:35Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-5
+    resourceVersion: "6855832"
+    uid: 93731580-cbe0-468f-b72e-b2eb848d6999
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-5
+      namespace: iccbs
+      resourceVersion: "6842682"
+      uid: 79f1ce4b-40c5-4091-9e88-4bc8186f1b47
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-5
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T07:23:44Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-6"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-6","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:02:08Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-6
+    resourceVersion: "6885780"
+    uid: f11fd975-e6cb-4f83-af67-f4dfd7467b8a
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-3
+      namespace: iccbs
+      resourceVersion: "6842236"
+      uid: b6088ca5-e01c-4525-981d-aeed45a8e315
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-6
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:02:15Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-7"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-7","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:39:43Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-7
+    resourceVersion: "6893000"
+    uid: b8d96af6-a5b0-475d-9aac-e41336310667
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-7
+      namespace: iccbs
+      resourceVersion: "6892972"
+      uid: 8b818d7a-1c27-401c-8da9-7d6794053b05
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-7
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:39:45Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-8"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-8","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:50Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-8
+    resourceVersion: "6894591"
+    uid: c7f0d369-9352-4603-82dd-273ecd2f7cbf
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-12
+      namespace: iccbs
+      resourceVersion: "6894452"
+      uid: fbfef3bc-6647-4843-8487-6ada53d6b0e3
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-8
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:48:00Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolume","metadata":{"annotations":{},"name":"pv-iccbsai-9"},"spec":{"accessModes":["ReadWriteMany"],"capacity":{"storage":"450Gi"},"mountOptions":["hard","nfsvers=4.1"],"nfs":{"path":"/mnt/shared-data/iccbsai-9","server":"172.16.2.39"},"persistentVolumeReclaimPolicy":"Retain","storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:43Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pv-iccbsai-9
+    resourceVersion: "6894536"
+    uid: fc484c94-eaa2-4269-b02f-344edff76eb5
+  spec:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: claim-iccbsai-11
+      namespace: iccbs
+      resourceVersion: "6894433"
+      uid: a1f90b2b-63b9-4d21-87a8-ad20db4834b2
+    mountOptions:
+    - hard
+    - nfsvers=4.1
+    nfs:
+      path: /mnt/shared-data/iccbsai-9
+      server: 172.16.2.39
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-26T10:47:45Z"
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      local.path.provisioner/selected-node: ai-38
+      pv.kubernetes.io/provisioned-by: rancher.io/local-path
+    creationTimestamp: "2026-01-24T18:29:43Z"
+    finalizers:
+    - kubernetes.io/pv-protection
+    name: pvc-94c63b08-d1ab-4d22-b886-6f7d033f939f
+    resourceVersion: "6437046"
+    uid: bde04658-3be1-4640-b5ee-6595914f164c
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: hub-db-dir
+      namespace: iccbs
+      resourceVersion: "6436999"
+      uid: 94c63b08-d1ab-4d22-b886-6f7d033f939f
+    hostPath:
+      path: /opt/local-path-provisioner/pvc-94c63b08-d1ab-4d22-b886-6f7d033f939f_iccbs_hub-db-dir
+      type: DirectoryOrCreate
+    nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - ai-38
+    persistentVolumeReclaimPolicy: Delete
+    storageClassName: local-path
+    volumeMode: Filesystem
+  status:
+    lastPhaseTransitionTime: "2026-01-24T18:29:43Z"
+    phase: Bound
+kind: List
+metadata:
+  resourceVersion: ""

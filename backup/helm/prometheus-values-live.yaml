@@ -1,0 +1,4 @@
+grafana:
+  service:
+    nodePort: 32500
+    type: NodePort

@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-gateway-config
+  namespace: ai-gateway
+data:
+  QWEN_URL: "http://qwen-7b-svc.ai-models.svc.cluster.local:8000"
+  DEEPSEEK_URL: "http://deepseek-coder-svc.ai-models.svc.cluster.local:8000"
+  MISTRAL_URL: "http://mistral-7b-svc.ai-models.svc.cluster.local:8000"
+
+  CODING_KEYWORDS: |
+    python
+    code
+    script
+    error
+    debugging
+    kubernetes
+    docker
+    bash
+    pipeline
+
+  BIO_KEYWORDS: |
+    genome
+    dna
+    rna
+    protein
+    bioinformatics
+    gromacs
+    molecular
+    ligand
+    receptor
+    docking
+    drug
+    cheminformatics
+
+  DEFAULT_MODEL: "mistral"

@@ -1,0 +1,103 @@
+# ==============================
+# Base image: CUDA 12.1 + Ubuntu 22.04
+# Using 12.1 to match stable PyTorch + PyG wheels
+# ==============================
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+
+# ==============================
+# Environment & Path setup
+# ==============================
+ENV DEBIAN_FRONTEND=noninteractive \
+    CONDA_DIR=/opt/conda \
+    PATH=/opt/conda/bin:/usr/local/bin:$PATH \
+    PYTHONPATH=/home/iccbs
+
+# Jupyter user args
+ARG NB_USER=iccbs
+ARG NB_UID=1000
+ARG NB_GID=100
+
+# ==============================
+# System dependencies (Minimal & Essential)
+# ==============================
+RUN sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list && \
+
+    apt-get update && apt-get install -y --no-install-recommends \ 
+        wget \
+        curl \
+        git \
+        ca-certificates \
+        build-essential \
+        cmake \
+        libglib2.0-0 \
+        libsm6 \
+        libxrender1 \
+        libxext6 \
+        graphviz \
+    && rm -rf /var/lib/apt/lists/*
+
+# ==============================
+# Install Miniforge
+# ==============================
+RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O /tmp/miniforge.sh && \
+    bash /tmp/miniforge.sh -b -p ${CONDA_DIR} && \
+    rm /tmp/miniforge.sh && \
+    conda config --set always_yes yes && \
+    conda clean -ya
+
+# ==============================
+# Core Python & PyTorch (CUDA 12.1)
+# ==============================
+RUN conda install -y \
+        python=3.10 \
+        notebook \
+        jupyterlab \
+        jupyterhub \
+        ipykernel \
+        pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia && \
+    conda clean -ya
+
+# ==============================
+# PyTorch Geometric (CRITICAL FIX)
+# ==============================
+# This installs the binaries specifically compiled for PyTorch + CUDA 12.1
+RUN pip install --no-cache-dir torch_geometric && \
+    pip install --no-cache-dir torch-scatter torch-sparse torch-cluster torch-spline-conv \
+    -f https://data.pyg.org/whl/torch-$(python3 -c "import torch; print(torch.__version__.split('+')[0])")+cu121.html
+
+# ==============================
+# Main Deep Learning & Science Tools
+# ==============================
+RUN pip install --no-cache-dir \
+        transformers \
+        datasets \
+        accelerate \
+        scikit-learn \
+        pandas \
+        numpy \
+        matplotlib \
+        seaborn \
+        tqdm \
+        rdkit \
+        scipy \
+        pyarrow \
+        einops
+
+# ==============================
+# Create notebook user & Permissions
+# ==============================
+RUN if ! getent group ${NB_GID} >/dev/null; then groupadd -g ${NB_GID} ${NB_USER}; fi && \
+    useradd -m -s /bin/bash -N -u ${NB_UID} -g ${NB_GID} ${NB_USER} && \
+    mkdir -p /workspace /home/${NB_USER}/shared-datasets && \
+    chown -R ${NB_UID}:${NB_GID} /home/${NB_USER} /workspace /opt/conda
+
+# IMPORTANT: Run the symlink command while still ROOT
+RUN ln -sf /opt/conda/bin/jupyterhub-singleuser /usr/local/bin/jupyterhub-singleuser
+
+# ==============================
+# Switch to notebook user (Now we drop privileges)
+# ==============================
+USER ${NB_UID}:${NB_GID}
+WORKDIR /home/${NB_USER}
+
+CMD ["bash"]

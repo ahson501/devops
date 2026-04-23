@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-copilot-sa
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ai-copilot-role
+  namespace: monitoring
+rules:
+- apiGroups: [""]
+  resources:
+    - services
+    - pods
+    - events
+    - configmaps
+  verbs:
+    - get
+    - list
+    - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ai-copilot-rolebinding
+  namespace: monitoring
+subjects:
+- kind: ServiceAccount
+  name: ai-copilot-sa
+  namespace: monitoring
+roleRef:
+  kind: Role
+  name: ai-copilot-role
+  apiGroup: rbac.authorization.k8s.io

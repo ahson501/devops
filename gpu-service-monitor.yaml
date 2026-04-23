@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nvidia-dcgm-exporter-monitor
+  namespace: monitoring
+  labels:
+    release: prometheus-stack  # This MUST match the name of your helm install
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dcgm-exporter
+  namespaceSelector:
+    matchNames:
+      - gpu-operator
+  endpoints:
+  - port: gpu-metrics
+    interval: 15s

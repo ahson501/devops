@@ -1,0 +1,123 @@
+# ==============================
+# Base image: NVIDIA CUDA + Ubuntu 22.04
+# ==============================
+FROM nvidia/cuda:12.2.0-devel-ubuntu22.04
+
+# ==============================
+# Environment
+# ==============================
+ENV DEBIAN_FRONTEND=noninteractive
+ENV CONDA_DIR=/opt/conda
+
+# IMPORTANT: PATH must include conda + /usr/local/bin
+ENV PATH=/opt/conda/bin:/usr/local/bin:/usr/local/gromacs/bin:$PATH
+
+# Jupyter user settings (MATCH JupyterHub)
+ARG NB_USER=iccbs
+ARG NB_UID=1000
+ARG NB_GID=100
+
+# ==============================
+# System dependencies
+# ==============================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        wget \
+        bzip2 \
+        ca-certificates \
+        git \
+        build-essential \
+        cmake \
+        libfftw3-dev \
+        libopenblas-dev \
+        liblapack-dev \
+        python3 \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# ==============================
+# Install Miniconda
+# ==============================
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p ${CONDA_DIR} && \
+    rm /tmp/miniconda.sh && \
+    ${CONDA_DIR}/bin/conda config --set always_yes yes --set changeps1 no && \
+    ${CONDA_DIR}/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    ${CONDA_DIR}/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
+    ${CONDA_DIR}/bin/conda clean -ya
+
+# ==============================
+# Install Jupyter (CONDA + PIP, REQUIRED)
+# ==============================
+RUN ${CONDA_DIR}/bin/conda install \
+        notebook \
+        jupyterlab \
+        jupyterhub \
+    && ${CONDA_DIR}/bin/conda clean -ya
+
+# Ensure console scripts exist (CRITICAL)
+RUN ${CONDA_DIR}/bin/pip install --no-cache-dir \
+        jupyterhub \
+        jupyterlab
+
+# ==============================
+# Make jupyterhub-singleuser globally executable
+# (MUST be done as root)
+# ==============================
+RUN ln -sf /opt/conda/bin/jupyterhub-singleuser /usr/local/bin/jupyterhub-singleuser && \
+    chmod +x /opt/conda/bin/jupyterhub-singleuser
+
+# ==============================
+# Install modern CMake (required by GROMACS)
+# ==============================
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.28.2/cmake-3.28.2-linux-x86_64.sh -O /tmp/cmake.sh && \
+    bash /tmp/cmake.sh --skip-license --prefix=/usr/local && \
+    rm /tmp/cmake.sh
+
+# ==============================
+# Build GROMACS 2025.4 with CUDA
+# ==============================
+ARG GMX_VER=2025.4
+RUN wget https://ftp.gromacs.org/pub/gromacs/gromacs-${GMX_VER}.tar.gz -O /tmp/gromacs.tar.gz && \
+    tar -xzf /tmp/gromacs.tar.gz -C /tmp && \
+    mkdir -p /tmp/gromacs-${GMX_VER}/build && \
+    cd /tmp/gromacs-${GMX_VER}/build && \
+    cmake .. \
+      -DGMX_GPU=CUDA \
+      -DGMX_BUILD_OWN_FFTW=ON \
+      -DCMAKE_INSTALL_PREFIX=/usr/local/gromacs && \
+    make -j$(nproc) && make install && \
+    rm -rf /tmp/gromacs*
+
+# ==============================
+# GROMACS environment
+# ==============================
+ENV LD_LIBRARY_PATH=/usr/local/gromacs/lib:${LD_LIBRARY_PATH}
+
+# ==============================
+# Create Jupyter user (ROOT ONLY)
+# ==============================
+RUN if ! getent group ${NB_GID} >/dev/null; then \
+        groupadd -g ${NB_GID} ${NB_USER}; \
+    fi && \
+    id -u ${NB_UID} >/dev/null 2>&1 || \
+        useradd -m -s /bin/bash -N -u ${NB_UID} -g ${NB_GID} ${NB_USER}
+
+# ==============================
+# Workspace + permissions
+# ==============================
+RUN mkdir -p /home/${NB_USER}/shared-datasets && \
+    chown -R ${NB_UID}:${NB_GID} \
+        /home/${NB_USER} \
+        /opt/conda \
+        /usr/local/gromacs
+
+# ==============================
+# Switch to notebook user
+# ==============================
+USER ${NB_UID}:${NB_GID}
+WORKDIR /home/iccbs
+
+# ==============================
+# Default command (ignored by JupyterHub)
+# ==============================
+CMD ["bash"]

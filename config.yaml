@@ -1,0 +1,145 @@
+hub:
+  db:
+    type: sqlite-pvc
+    pvc:
+      storageClassName: local-path
+      accessModes:
+        - ReadWriteOnce
+      storage: 10Gi
+
+proxy:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 32372
+
+cull:
+  enabled: false
+
+singleuser:
+  startTimeout: 1200
+
+  image:
+    name: quay.io/jupyter/pytorch-notebook
+    tag: cuda12-latest
+    pullPolicy: Always
+
+  storage:
+    type: dynamic
+    homeMountPath: /home/iccbs
+    capacity: 450Gi
+    dynamic:
+     pvcNameTemplate: claim-{username}
+     storageClass: nfs-shared
+
+    extraVolumes:
+     - name: shared-datasets
+       persistentVolumeClaim:
+         claimName: jupyterhub-shared-data
+
+    extraVolumeMounts:
+     - name: shared-datasets
+       mountPath: /home/iccbs/shared-datasets
+
+  extraEnv:
+   HOME: "/home/iccbs"
+   NB_USER: "iccbs"
+
+  profileList:
+
+    - display_name: "ICCBS CP2K Quantum Chemistry"
+      description: "GPU-accelerated environment for quantum chemistry, DFT, and MD simulations using CP2K"
+      kubespawner_override:
+        image: registry-1.docker.io/ahsonlatif/ai-cp2k-chem:latest
+        cpu_limit: 12            # allow up to 12 cores per user
+        cpu_guarantee: 6         # guaranteed 6 cores
+        mem_limit: 64G           # max 64 GiB RAM
+        mem_guarantee: 32G       # guaranteed 32 GiB RAM
+        extra_resource_limits:
+          nvidia.com/gpu: "1"   # single shared GPU
+        node_selector:
+          kubernetes.io/hostname: ai-master
+        fs_gid: 100
+        run_as_uid: 1000
+
+
+    - display_name: "ICCBS PyTorch Deep Learning"
+      description: "GPU-enabled research environment for deep learning and AI workflows using PyTorch"
+      kubespawner_override:
+        image: registry-1.docker.io/ahsonlatif/pytorch_deeplearning:latest
+        cpu_limit: 4
+        cpu_guarantee: 2
+        mem_limit: 32G
+        mem_guarantee: 16G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        # --- CRITICAL ADDITIONS BELOW ---
+        environment:
+          NVIDIA_VISIBLE_DEVICES: "all"
+          NVIDIA_DRIVER_CAPABILITIES: "compute,utility"
+        # --------------------------------
+        node_selector:
+          kubernetes.io/hostname: node1
+        uid: 1000   # Use 'uid' instead of 'run_as_uid' for KubeSpawner
+        fs_gid: 100
+
+    - display_name: "ICCBS GROMACS Molecular Dynamics"
+      description: "GPU-accelerated environment for molecular dynamics simulations using GROMACS"
+      kubespawner_override:
+        image: registry-1.docker.io/ahsonlatif/gromacs-jupyter:cuda12
+        cpu_limit: 6
+        cpu_guarantee: 3
+        mem_limit: 24G
+        mem_guarantee: 12G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        node_selector:
+          kubernetes.io/hostname: node1
+        fs_gid: 100
+        run_as_uid: 1000
+
+    - display_name: "TWC GROMACS Molecular Dynamics"
+      description: "GPU-accelerated environment for molecular dynamics simulations using GROMACS"
+      kubespawner_override:
+        image: registry-1.docker.io/ahsonlatif/gromacs-jupyter:cuda12
+        cpu_limit: 6
+        cpu_guarantee: 3
+        mem_limit: 24G
+        mem_guarantee: 12G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        node_selector:
+          kubernetes.io/hostname: ai-master
+        fs_gid: 100
+        run_as_uid: 1000
+
+
+    - display_name: "ICCBS Bioinformatics AI"
+      description: "High-performance GPU-based environment for bioinformatics analysis and AI research"
+      kubespawner_override:
+        image: registry-1.docker.io/ahsonlatif/iccbs-bioinformatics:latest
+        cpu_limit: 8
+        cpu_guarantee: 4
+        mem_limit: 32G
+        mem_guarantee: 16G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        node_selector:
+          kubernetes.io/hostname: ai-38
+        fs_gid: 100
+        run_as_uid: 1000
+
+    - display_name: "ICCBS Bio & Chemical AI Research"
+      description: "GPU-enabled environment for bioinformatics, cheminformatics, and AI-driven molecular research"
+      kubespawner_override:
+        image: registry-1.docker.io/ahsonlatif/ai_bio_chem:latest
+        cpu_limit: 8
+        cpu_guarantee: 4
+        mem_limit: 32G
+        mem_guarantee: 16G
+        extra_resource_limits:
+          nvidia.com/gpu: "1"
+        node_selector:
+          kubernetes.io/hostname: ai-master
+        fs_gid: 100
+        run_as_uid: 1000

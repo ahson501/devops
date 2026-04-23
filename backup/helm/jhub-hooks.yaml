@@ -1,0 +1,353 @@
+---
+# Source: jupyterhub/templates/image-puller/serviceaccount-hook.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hook-image-puller
+  labels:
+    component: image-puller
+    app.kubernetes.io/component: image-puller
+    app: "jupyterhub"
+    release: "jhub"
+    chart: jupyterhub-4.3.2
+    heritage: Helm
+    app.kubernetes.io/name: "jupyterhub"
+    app.kubernetes.io/instance: "jhub"
+    helm.sh/chart: jupyterhub-4.3.2
+    app.kubernetes.io/managed-by: Helm
+    hub.jupyter.org/deletable: "true"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "-10"
+---
+# Source: jupyterhub/templates/image-puller/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hook-image-awaiter
+  labels:
+    component: image-puller
+    app.kubernetes.io/component: image-puller
+    app: "jupyterhub"
+    release: "jhub"
+    chart: jupyterhub-4.3.2
+    heritage: Helm
+    app.kubernetes.io/name: "jupyterhub"
+    app.kubernetes.io/instance: "jhub"
+    helm.sh/chart: jupyterhub-4.3.2
+    app.kubernetes.io/managed-by: Helm
+    hub.jupyter.org/deletable: "true"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+---
+# Source: jupyterhub/templates/image-puller/rbac.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: hook-image-awaiter
+  labels:
+    component: image-puller
+    app.kubernetes.io/component: image-puller
+    app: "jupyterhub"
+    release: "jhub"
+    chart: jupyterhub-4.3.2
+    heritage: Helm
+    app.kubernetes.io/name: "jupyterhub"
+    app.kubernetes.io/instance: "jhub"
+    helm.sh/chart: jupyterhub-4.3.2
+    app.kubernetes.io/managed-by: Helm
+    hub.jupyter.org/deletable: "true"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+rules:
+  - apiGroups: ["apps"]       # "" indicates the core API group
+    resources: ["daemonsets"]
+    verbs: ["get"]
+---
+# Source: jupyterhub/templates/image-puller/rbac.yaml
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: hook-image-awaiter
+  labels:
+    component: image-puller
+    app.kubernetes.io/component: image-puller
+    app: "jupyterhub"
+    release: "jhub"
+    chart: jupyterhub-4.3.2
+    heritage: Helm
+    app.kubernetes.io/name: "jupyterhub"
+    app.kubernetes.io/instance: "jhub"
+    helm.sh/chart: jupyterhub-4.3.2
+    app.kubernetes.io/managed-by: Helm
+    hub.jupyter.org/deletable: "true"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+subjects:
+  - kind: ServiceAccount
+    name: hook-image-awaiter
+    namespace: "iccbs"
+roleRef:
+  kind: Role
+  name: hook-image-awaiter
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: jupyterhub/templates/image-puller/daemonset-hook.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: hook-image-puller
+  labels:
+    component: hook-image-puller
+    app.kubernetes.io/component: hook-image-puller
+    app: "jupyterhub"
+    release: "jhub"
+    chart: jupyterhub-4.3.2
+    heritage: Helm
+    app.kubernetes.io/name: "jupyterhub"
+    app.kubernetes.io/instance: "jhub"
+    helm.sh/chart: jupyterhub-4.3.2
+    app.kubernetes.io/managed-by: Helm
+    hub.jupyter.org/deletable: "true"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "-10"
+spec:
+  selector:
+    matchLabels:
+      component: hook-image-puller
+      app: "jupyterhub"
+      release: "jhub"
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+  template:
+    metadata:
+      labels:
+        component: hook-image-puller
+        app.kubernetes.io/component: hook-image-puller
+        app: "jupyterhub"
+        release: "jhub"
+        app.kubernetes.io/name: "jupyterhub"
+        app.kubernetes.io/instance: "jhub"
+    spec:
+      tolerations:
+        - effect: NoSchedule
+          key: hub.jupyter.org/dedicated
+          operator: Equal
+          value: user
+        - effect: NoSchedule
+          key: hub.jupyter.org_dedicated
+          operator: Equal
+          value: user
+      terminationGracePeriodSeconds: 0
+      serviceAccountName: hook-image-puller
+      automountServiceAccountToken: false
+      initContainers:
+        - name: image-pull-metadata-block
+          image: quay.io/jupyterhub/k8s-network-tools:4.3.2
+          command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+        - name: image-pull-singleuser
+          image: quay.io/jupyter/pytorch-notebook:cuda12-latest
+          command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+        - name: image-pull-singleuser-profilelist-0
+          image: registry-1.docker.io/ahsonlatif/ai-cp2k-chem:latest
+          command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+        - name: image-pull-singleuser-profilelist-1
+          image: registry-1.docker.io/ahsonlatif/iccbs-healthsciences-notebook:latest
+          command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+        - name: image-pull-singleuser-profilelist-2
+          image: registry-1.docker.io/ahsonlatif/gromacs-jupyter:cuda12
+          command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+        - name: image-pull-singleuser-profilelist-3
+          image: registry-1.docker.io/ahsonlatif/iccbs-bioinformatics:latest
+          command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+        - name: image-pull-singleuser-profilelist-4
+          image: registry-1.docker.io/ahsonlatif/ai_bio_chem:latest
+          command:
+            - /bin/sh
+            - -c
+            - echo "Pulling complete"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.10.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault
+---
+# Source: jupyterhub/templates/image-puller/job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hook-image-awaiter
+  labels:
+    component: image-puller
+    app.kubernetes.io/component: image-puller
+    app: "jupyterhub"
+    release: "jhub"
+    chart: jupyterhub-4.3.2
+    heritage: Helm
+    app.kubernetes.io/name: "jupyterhub"
+    app.kubernetes.io/instance: "jhub"
+    helm.sh/chart: jupyterhub-4.3.2
+    app.kubernetes.io/managed-by: Helm
+    hub.jupyter.org/deletable: "true"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "10"
+spec:
+  template:
+    # The hook-image-awaiter Job and hook-image-puller DaemonSet was
+    # conditionally created based on this state:
+    #
+    # prePuller.hook.enabled=true
+    # prePuller.hook.pullOnlyOnChanges=true
+    # post-upgrade checksum != pre-upgrade checksum (of the hook-image-puller DaemonSet)
+    # "1d8237f232bca654586967dd3b89238403111116cc82470d8497dfaca4419914" != "205d9571e06a92feb7961b52fc3e09ccc3c8833d2c6256a4cc7fe31eee8426fc"
+    #
+    metadata:
+      labels:
+        component: image-puller
+        app.kubernetes.io/component: image-puller
+        app: "jupyterhub"
+        release: "jhub"
+        app.kubernetes.io/name: "jupyterhub"
+        app.kubernetes.io/instance: "jhub"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: hook-image-awaiter
+      tolerations:
+        - effect: NoSchedule
+          key: hub.jupyter.org/dedicated
+          operator: Equal
+          value: core
+        - effect: NoSchedule
+          key: hub.jupyter.org_dedicated
+          operator: Equal
+          value: core
+      containers:
+        - image: quay.io/jupyterhub/k8s-image-awaiter:4.3.2
+          name: hook-image-awaiter
+          command:
+            - /image-awaiter
+            - -ca-path=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            - -auth-token-path=/var/run/secrets/kubernetes.io/serviceaccount/token
+            - -api-server-address=https://kubernetes.default.svc:$(KUBERNETES_SERVICE_PORT)
+            - -namespace=iccbs
+            - -daemonset=hook-image-puller
+            - -pod-scheduling-wait-duration=10
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile:
+              type: RuntimeDefault

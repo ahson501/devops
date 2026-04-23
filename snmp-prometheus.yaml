@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: snmp-cisco
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      snmp-target: "true"
+  endpoints:
+    - port: snmp
+      interval: 30s
+      path: /snmp
+      params:
+        module: [cisco]
+        auth: [cisco_v2]
+      relabelings:
+        - sourceLabels: [__address__]
+          targetLabel: __param_target
+        - sourceLabels: [__meta_kubernetes_service_name]
+          targetLabel: switch_name
+        # PRO-TIP: This regex converts lowercase names back to uppercase-style labels for Grafana
+        - sourceLabels: [switch_name]
+          targetLabel: display_name
+          replacement: '${1}' # You can manually map these if you have a few
+        - sourceLabels: [__param_target]
+          targetLabel: instance
+        - targetLabel: __address__
+          replacement: snmp-exporter-prometheus-snmp-exporter.monitoring.svc.cluster.local:9116

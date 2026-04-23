@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-iccbsai-7 # Every PV needs a unique name
+spec:
+  capacity:
+    storage: 450Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-shared
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /mnt/shared-data/iccbsai-7 # Ensure this folder exists on 172.16.2.39
+    server: 172.16.2.40

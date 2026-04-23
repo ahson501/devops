@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-bge
+  namespace: ai-models
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: embedding-bge
+  template:
+    metadata:
+      labels:
+        app: embedding-bge
+    spec:
+      containers:
+      - name: bge
+        image: ghcr.io/huggingface/text-embeddings-inference:latest
+        args:
+          - "--model-id"
+          - "BAAI/bge-large-en-v1.5"
+        ports:
+        - containerPort: 80

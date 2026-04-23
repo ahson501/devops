@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mistral-vllm
+  namespace: ai-models
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mistral-vllm
+
+  template:
+    metadata:
+      labels:
+        app: mistral-vllm
+
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node1
+      containers:
+      - name: mistral
+        image: vllm/vllm-openai:latest
+        imagePullPolicy: IfNotPresent
+        args:
+        - "--model"
+        - "mistralai/Mistral-7B-Instruct-v0.2"
+        - "--gpu-memory-utilization"
+        - "0.90"
+        - "--max-model-len"
+        - "256"
+        - "--enforce-eager"
+        - "--dtype"
+        - "float16"
+
+        ports:
+        - containerPort: 8000
+
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+
+        volumeMounts:
+        - name: model-cache
+          mountPath: /root/.cache/huggingface
+
+      #volumes:
+      #- name: model-cache
+      #  persistentVolumeClaim:
+      #    claimName: hf-model-cache
+      volumes:
+      - name: model-cache
+        hostPath:
+          path: /data/hf-cache
+          type: DirectoryOrCreate

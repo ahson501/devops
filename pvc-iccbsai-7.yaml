@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim-iccbsai-7
+  namespace: iccbs
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 450Gi
+  storageClassName: nfs-shared
+  volumeName: pv-iccbsai-7

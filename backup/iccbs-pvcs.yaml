@@ -1,0 +1,439 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-1","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T06:13:03Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-1
+    namespace: iccbs
+    resourceVersion: "6887665"
+    uid: 44b4cbbb-5937-475e-8e64-de700185a04f
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-1
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-10","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:18Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-10
+    namespace: iccbs
+    resourceVersion: "6894534"
+    uid: 57eaab3e-f123-416c-a408-e6f5d808e96a
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-10
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-11","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:21Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-11
+    namespace: iccbs
+    resourceVersion: "6894538"
+    uid: a1f90b2b-63b9-4d21-87a8-ad20db4834b2
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-9
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-12","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:26Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-12
+    namespace: iccbs
+    resourceVersion: "6894595"
+    uid: fbfef3bc-6647-4843-8487-6ada53d6b0e3
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-8
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-2","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T06:12:57Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-2
+    namespace: iccbs
+    resourceVersion: "6857021"
+    uid: 0a93d74f-f847-4667-aca2-5fa44d37fca6
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-4
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-3","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T06:12:52Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-3
+    namespace: iccbs
+    resourceVersion: "6885782"
+    uid: b6088ca5-e01c-4525-981d-aeed45a8e315
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-6
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-4","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T06:12:40Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-4
+    namespace: iccbs
+    resourceVersion: "6884693"
+    uid: 42b39292-048b-45a0-ae79-130d611c8495
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-2
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-5","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T06:14:59Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-5
+    namespace: iccbs
+    resourceVersion: "6855834"
+    uid: 79f1ce4b-40c5-4091-9e88-4bc8186f1b47
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-5
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-6","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:49:32Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-6
+    namespace: iccbs
+    resourceVersion: "6895030"
+    uid: d3ca6f8f-2952-41e6-a160-12b8dd895e4c
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-3
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-7","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:39:38Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-7
+    namespace: iccbs
+    resourceVersion: "6893002"
+    uid: 8b818d7a-1c27-401c-8da9-7d6794053b05
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-7
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-8","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:09Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-8
+    namespace: iccbs
+    resourceVersion: "6894530"
+    uid: 5177d0a7-3589-4ef3-a61e-16d5ada65606
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-12
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"claim-iccbsai-9","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"450Gi"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-26T10:47:12Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: claim-iccbsai-9
+    namespace: iccbs
+    resourceVersion: "6894526"
+    uid: 850f380c-1f93-412b-a44b-c39e6fac7e59
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 450Gi
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: pv-iccbsai-11
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 450Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      meta.helm.sh/release-name: jhub
+      meta.helm.sh/release-namespace: iccbs
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+      volume.beta.kubernetes.io/storage-provisioner: rancher.io/local-path
+      volume.kubernetes.io/selected-node: ai-38
+      volume.kubernetes.io/storage-provisioner: rancher.io/local-path
+    creationTimestamp: "2026-01-24T18:19:03Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    labels:
+      app: jupyterhub
+      app.kubernetes.io/component: hub
+      app.kubernetes.io/instance: jhub
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: jupyterhub
+      chart: jupyterhub-4.3.2
+      component: hub
+      helm.sh/chart: jupyterhub-4.3.2
+      heritage: Helm
+      release: jhub
+    name: hub-db-dir
+    namespace: iccbs
+    resourceVersion: "6437048"
+    uid: 94c63b08-d1ab-4d22-b886-6f7d033f939f
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 10Gi
+    storageClassName: local-path
+    volumeMode: Filesystem
+    volumeName: pvc-94c63b08-d1ab-4d22-b886-6f7d033f939f
+  status:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 10Gi
+    phase: Bound
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"name":"jupyterhub-shared-data","namespace":"iccbs"},"spec":{"accessModes":["ReadWriteMany"],"resources":{"requests":{"storage":"4Ti"}},"storageClassName":"nfs-shared"}}
+      pv.kubernetes.io/bind-completed: "yes"
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: "2026-01-23T17:58:22Z"
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: jupyterhub-shared-data
+    namespace: iccbs
+    resourceVersion: "6159175"
+    uid: 18342a5b-fb05-49ad-999e-11ab2ded91bb
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 4Ti
+    storageClassName: nfs-shared
+    volumeMode: Filesystem
+    volumeName: nfs-shared-data-pv
+  status:
+    accessModes:
+    - ReadWriteMany
+    capacity:
+      storage: 4Ti
+    phase: Bound
+kind: List
+metadata:
+  resourceVersion: ""

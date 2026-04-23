@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-copilot-ui
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-copilot-ui
+  template:
+    metadata:
+      labels:
+        app: ai-copilot-ui
+    spec:
+      containers:
+        - name: ui
+          image: registry-1.docker.io/ahsonlatif/ai-copilot-ui:v8
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8501
+          # --- Environment Variables to connect to Backend ---
+          env:
+            - name: BACKEND_URL
+              value: "http://ai-copilot:80"
+          # --------------------------------------------------
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8501
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8501
+            initialDelaySeconds: 5
+            periodSeconds: 5
