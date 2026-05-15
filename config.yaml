@@ -1,11 +1,6 @@
 hub:
   db:
-    type: sqlite-pvc
-    pvc:
-      storageClassName: local-path
-      accessModes:
-        - ReadWriteOnce
-      storage: 10Gi
+    type: sqlite-memory
 
 proxy:
   service:
@@ -16,34 +11,38 @@ proxy:
 cull:
   enabled: false
 
+
 singleuser:
   startTimeout: 1200
+
+  storage:
+    type: none
+
+  extraEnv:
+    HOME: /home/iccbs
+    NB_USER: iccbs
 
   image:
     name: quay.io/jupyter/pytorch-notebook
     tag: cuda12-latest
     pullPolicy: Always
 
-  storage:
-    type: dynamic
-    homeMountPath: /home/iccbs
-    capacity: 450Gi
-    dynamic:
-     pvcNameTemplate: claim-{username}
-     storageClass: nfs-shared
+  #storage:
+    #type: dynamic
+    #homeMountPath: /home/iccbs
+    #capacity: 450Gi
+    #dynamic:
+    # pvcNameTemplate: claim-{username}
+     #storageClass: nfs-shared
 
-    extraVolumes:
-     - name: shared-datasets
-       persistentVolumeClaim:
-         claimName: jupyterhub-shared-data
+    #extraVolumes:
+     #- name: shared-datasets
+       #persistentVolumeClaim:
+         #claimName: jupyterhub-shared-data
 
-    extraVolumeMounts:
-     - name: shared-datasets
-       mountPath: /home/iccbs/shared-datasets
-
-  extraEnv:
-   HOME: "/home/iccbs"
-   NB_USER: "iccbs"
+    #extraVolumeMounts:
+     #- name: shared-datasets
+       #mountPath: /home/iccbs/shared-datasets
 
   profileList:
 
@@ -60,7 +59,7 @@ singleuser:
         node_selector:
           kubernetes.io/hostname: ai-master
         fs_gid: 100
-        run_as_uid: 1000
+        uid: 1000
 
 
     - display_name: "ICCBS PyTorch Deep Learning"
@@ -84,39 +83,43 @@ singleuser:
         fs_gid: 100
 
     - display_name: "ICCBS GROMACS Molecular Dynamics"
-      description: "GPU-accelerated environment for molecular dynamics simulations using GROMACS"
+      description: "GPU-accelerated environment"
       kubespawner_override:
         image: registry-1.docker.io/ahsonlatif/gromacs-jupyter:cuda12
+
         cpu_limit: 6
         cpu_guarantee: 3
         mem_limit: 24G
         mem_guarantee: 12G
+
         extra_resource_limits:
           nvidia.com/gpu: "1"
+
         node_selector:
           kubernetes.io/hostname: node1
-        fs_gid: 100
-        run_as_uid: 1000
 
-    - display_name: "TWC GROMACS Molecular Dynamics"
-      description: "GPU-accelerated environment for molecular dynamics simulations using GROMACS"
-      kubespawner_override:
-        image: registry-1.docker.io/ahsonlatif/gromacs-jupyter:cuda12
-        cpu_limit: 6
-        cpu_guarantee: 3
-        mem_limit: 24G
-        mem_guarantee: 12G
-        extra_resource_limits:
-          nvidia.com/gpu: "1"
-        node_selector:
-          kubernetes.io/hostname: ai-master
-        fs_gid: 100
-        run_as_uid: 1000
+    # 🔥 THIS disables NFS PVC
+        #storage:
+          #type: none
 
+    # ✅ correct keys
+        extraVolumes:
+          - name: home
+            hostPath:
+              path: /data/jupyter-gromacs
+              type: DirectoryOrCreate
+
+        extraVolumeMounts:
+          - name: home
+            mountPath: /home/iccbs
+
+        uid: 1000
+        fs_gid: 100
 
     - display_name: "ICCBS Bioinformatics AI"
-      description: "High-performance GPU-based environment for bioinformatics analysis and AI research"
+      description: "High-performance GPU-based environment"
       kubespawner_override:
+        notebook_dir: /home/iccbs
         image: registry-1.docker.io/ahsonlatif/iccbs-bioinformatics:latest
         cpu_limit: 8
         cpu_guarantee: 4
@@ -126,8 +129,21 @@ singleuser:
           nvidia.com/gpu: "1"
         node_selector:
           kubernetes.io/hostname: ai-38
+         # 🔥 THIS disables NFS PVC
+        #storage:
+          #type: none
+        extraVolumes:
+          - name: home
+            hostPath:
+              path: /data/jupyter-bio
+              type: DirectoryOrCreate
+
+        extraVolumeMounts:
+          - name: home
+            mountPath: /home/iccbs
+
+        uid: 1000
         fs_gid: 100
-        run_as_uid: 1000
 
     - display_name: "ICCBS Bio & Chemical AI Research"
       description: "GPU-enabled environment for bioinformatics, cheminformatics, and AI-driven molecular research"
@@ -142,4 +158,4 @@ singleuser:
         node_selector:
           kubernetes.io/hostname: ai-master
         fs_gid: 100
-        run_as_uid: 1000
+        uid: 1000

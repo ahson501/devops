@@ -53,14 +53,17 @@ st.caption("Real-time Monitoring • AI Root Cause • Alerts • Topology View"
 @st.cache_data(ttl=10)
 def get_devices():
     try:
-        res = requests.get(
-            "http://ai-copilot.monitoring.svc.cluster.local/devices",
-            timeout=5
-        )
-        return res.json().get("devices", [])
-    except:
-        return []
+        res = requests.get(DEVICES_URL, timeout=5)
+        data = res.json()
 
+        # handle both formats safely
+        if isinstance(data, list):
+            return data
+        return data.get("devices", [])
+
+    except Exception as e:
+        st.error(f"Device fetch error: {e}")
+        return []
 
 @st.cache_data(ttl=5)
 def query_prometheus(query):
@@ -162,15 +165,13 @@ if analyze_btn or auto_refresh:
         # METRICS
         # =========================
         in_traffic = query_prometheus(
-            f'irate(ifHCInOctets{{instance="{device}"}}[2m]) * 8 / 1024 / 1024'
+            f'sum(irate(ifHCInOctets{{display_name="{device}"}}[2m])) * 8 / 1000000'
         )
-
         out_traffic = query_prometheus(
-            f'irate(ifHCOutOctets{{instance="{device}"}}[2m]) * 8 / 1024 / 1024'
+	    f'sum(irate(ifHCOutOctets{{display_name="{device}"}}[2m])) * 8 / 1000000'
         )
-
         interfaces_down = query_prometheus(
-            f'ifOperStatus{{instance="{device}"}} == 2'
+	    f'count(ifOperStatus{{display_name="{device}", ifOperStatus="2"}}) or vector(0)'
         )
 
         metrics = {
@@ -178,6 +179,7 @@ if analyze_btn or auto_refresh:
             "out_mbps": out_traffic,
             "interfaces_down": interfaces_down
         }
+
 
         col1, col2, col3 = st.columns(3)
 

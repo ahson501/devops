@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snmp-exporter-config
+  namespace: monitoring
+data:
+  snmp.yml: |+
+    auths:
+      cisco_v2:
+        version: 2
+        community: ICCBS-RO
+
+    modules:
+      cisco:
+        walk:
+          - 1.3.6.1.2.1.1
+          - 1.3.6.1.2.1.2.2
+          - 1.3.6.1.2.1.31.1.1
+          - 1.3.6.1.4.1.9.9.109.1.1.1.1
+          - 1.3.6.1.4.1.9.9.48.1.1.1
+          - 1.3.6.1.4.1.9.9.13.1
+
+        metrics:
+          - name: sysUpTime
+            oid: 1.3.6.1.2.1.1.3.0
+            type: gauge
+
+          - name: cpmCPUTotal5minRev
+            oid: 1.3.6.1.4.1.9.9.109.1.1.1.1.8
+            type: gauge
+            indexes:
+              - labelname: cpu
+                type: gauge
+
+          - name: ciscoMemoryPoolUsed
+            oid: 1.3.6.1.4.1.9.9.48.1.1.1.5
+            type: gauge
+            indexes:
+              - labelname: pool
+                type: gauge
+
+          - name: ciscoMemoryPoolFree
+            oid: 1.3.6.1.4.1.9.9.48.1.1.1.6
+            type: gauge
+            indexes:
+              - labelname: pool
+                type: gauge
+
+          - name: ciscoEnvMonTemperatureStatusValue
+            oid: 1.3.6.1.4.1.9.9.13.1.3.1.3
+            type: gauge
+            indexes:
+              - labelname: sensor
+                type: gauge
+
+          - name: ciscoEnvMonSupplyState
+            oid: 1.3.6.1.4.1.9.9.13.1.5.1.3
+            type: gauge
+            indexes:
+              - labelname: supply
+                type: gauge
+
+          - name: ciscoEnvMonFanState
+            oid: 1.3.6.1.4.1.9.9.13.1.4.1.3
+            type: gauge
+            indexes:
+              - labelname: fan
+                type: gauge
+
+          # ===== INTERFACE TEXT STRINGS (DECODED FORM) =====
+          - name: ifName
+            oid: 1.3.6.1.2.1.31.1.1.1.1
+            type: DisplayString
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+
+          - name: ifAlias
+            oid: 1.3.6.1.2.1.31.1.1.1.18
+            type: DisplayString
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+
+          - name: ifDescr
+            oid: 1.3.6.1.2.1.2.2.1.2
+            type: DisplayString
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+
+          # ===== INTERFACE HEALTH STATUS MAP =====
+          - name: ifOperStatus
+            oid: 1.3.6.1.2.1.2.2.1.8
+            type: gauge
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+            lookups:
+              - labels: [ifIndex]
+                labelname: ifName
+              - labels: [ifIndex]
+                labelname: ifAlias
+              - labels: [ifIndex]
+                labelname: ifDescr
+
+          # ===== HIGH CAPACITY 64-BIT TRAFFIC COUNTERS =====
+          - name: ifHCInOctets
+            oid: 1.3.6.1.2.1.31.1.1.1.6
+            type: counter
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+            lookups:
+              - labels: [ifIndex]
+                labelname: ifName
+              - labels: [ifIndex]
+                labelname: ifAlias
+              - labels: [ifIndex]
+                labelname: ifDescr
+
+          - name: ifHCOutOctets
+            oid: 1.3.6.1.2.1.31.1.1.1.10
+            type: counter
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+            lookups:
+              - labels: [ifIndex]
+                labelname: ifName
+              - labels: [ifIndex]
+                labelname: ifAlias
+              - labels: [ifIndex]
+                labelname: ifDescr

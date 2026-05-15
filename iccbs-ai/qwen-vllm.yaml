@@ -45,7 +45,14 @@ spec:
         - name: model-cache
           mountPath: /root/.cache/huggingface
 
+      #volumes:
+      #- name: model-cache
+        #persistentVolumeClaim:
+          #claimName: hf-model-cache
+
       volumes:
       - name: model-cache
-        persistentVolumeClaim:
-          claimName: hf-model-cache
+        hostPath:
+          path: /data/hf-cache
+          type: DirectoryOrCreate
+
