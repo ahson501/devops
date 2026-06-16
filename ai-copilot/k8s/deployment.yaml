@@ -16,7 +16,7 @@ spec:
       serviceAccountName: ai-copilot-sa
       containers:
         - name: ai-copilot
-          image: registry-1.docker.io/ahsonlatif/ai-copilot:v7
+          image: registry-1.docker.io/ahsonlatif/ai-copilot:v5
           imagePullPolicy: Always
 
           ports:

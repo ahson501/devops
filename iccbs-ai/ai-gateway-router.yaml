@@ -3,6 +3,7 @@ kind: ConfigMap
 metadata:
   name: ai-gateway-router
   namespace: ai-gateway
+
 data:
   router.py: |
     from fastapi import FastAPI, Request
@@ -11,62 +12,72 @@ data:
 
     app = FastAPI()
 
-    QWEN_URL = os.getenv("QWEN_URL")
-    DEEPSEEK_URL = os.getenv("DEEPSEEK_URL")
-    MISTRAL_URL = os.getenv("MISTRAL_URL")
+    # ----------------------------
+    # SAFE KUBERNETES DNS HANDLER
+    # ----------------------------
+    def get_model_url(env_key: str, default_svc: str) -> str:
+        val = os.getenv(env_key)
 
-    CODING_KEYWORDS = os.getenv("CODING_KEYWORDS", "").split()
-    BIO_KEYWORDS = os.getenv("BIO_KEYWORDS", "").split()
+        if not val:
+            return f"http://{default_svc}.ai-models.svc.cluster.local:8000"
 
-    def classify_prompt(prompt: str):
+        if ".svc.cluster.local" not in val:
+            return f"http://{default_svc}.ai-models.svc.cluster.local:8000"
 
+        return val
+
+    # ----------------------------
+    # MODEL ENDPOINTS
+    # ----------------------------
+    MISTRAL_BASE = get_model_url("MISTRAL_URL", "mistral-7b-svc")
+    QWEN_BASE = get_model_url("QWEN_URL", "qwen-7b-svc")
+    DEEPSEEK_BASE = get_model_url("DEEPSEEK_URL", "deepseek-coder-svc")
+
+    # ----------------------------
+    # SMART ROUTER LOGIC
+    # ----------------------------
+    def pick_model_base(prompt: str):
         p = prompt.lower()
 
-        for word in CODING_KEYWORDS:
-            if word in p:
-                return "deepseek"
+        # 💻 Coding / DevOps / Debugging → DeepSeek
+        if any(k in p for k in [
+            "code", "debug", "error", "stack trace",
+            "kubernetes", "docker", "yaml", "deployment",
+            "bug", "fix", "cli", "bash"
+        ]):
+            return DEEPSEEK_BASE
 
-        for word in BIO_KEYWORDS:
-            if word in p:
-                return "qwen"
+        # 🧬 Biology / Medicine → Qwen
+        if any(k in p for k in [
+            "bio", "biology", "dna", "rna", "protein",
+            "cell", "genome", "medical", "disease",
+            "virus", "vaccine", "enzyme"
+        ]):
+            return QWEN_BASE
 
-        return "mistral"
+        # 🧪 Chemistry / Molecules → Mistral
+        if any(k in p for k in [
+            "chemistry", "chemical", "reaction",
+            "compound", "molecule", "ligand",
+            "pubchem", "structure"
+        ]):
+            return MISTRAL_BASE
 
+        # default fallback
+        return MISTRAL_BASE
 
-    def get_target_url(model):
-
-        if model == "deepseek":
-            return DEEPSEEK_URL
-
-        if model == "qwen":
-            return QWEN_URL
-
-        return MISTRAL_URL
-
-
-    @app.get("/")
-    async def health():
-        return {"status": "ai-gateway-running"}
-
-
+    # ----------------------------
+    # API ROUTE
+    # ----------------------------
     @app.post("/v1/chat/completions")
-    async def route(request: Request):
+    async def route_completions(request: Request):
+        req_data = await request.json()
 
-        body = await request.json()
+        user_prompt = req_data.get("messages", [{}])[0].get("content", "")
 
-        try:
-            prompt = body["messages"][-1]["content"]
-        except:
-            prompt = ""
+        base_url = pick_model_base(user_prompt)
+        target_url = f"{base_url.rstrip('/')}/v1/chat/completions"
 
-        model = classify_prompt(prompt)
-
-        target = get_target_url(model)
-
-        async with httpx.AsyncClient(timeout=300) as client:
-            response = await client.post(
-                f"{target}/v1/chat/completions",
-                json=body
-            )
-
-        return response.json()
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(target_url, json=req_data)
+            return response.json()

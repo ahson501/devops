@@ -8,6 +8,13 @@ data:
   DEEPSEEK_URL: "http://deepseek-coder-svc.ai-models.svc.cluster.local:8000"
   MISTRAL_URL: "http://mistral-7b-svc.ai-models.svc.cluster.local:8000"
 
+  # FIXED: Pointing to your exact service declaration
+  PUBMED_VECTOR_URL: "http://embedding-bge-svc.ai-models.svc.cluster.local:80/collections/pubmed"
+  PUBCHEM_VECTOR_URL: "http://embedding-bge-svc.ai-models.svc.cluster.local:80/collections/pubchem"
+  BIOMODELS_VECTOR_URL: "http://embedding-bge-svc.ai-models.svc.cluster.local:80/collections/biomodels"
+
+  DEFAULT_MODEL: "mistral"
+
   CODING_KEYWORDS: |
     python
     code
@@ -32,5 +39,3 @@ data:
     docking
     drug
     cheminformatics
-
-  DEFAULT_MODEL: "mistral"

@@ -17,18 +17,18 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
-
+        image: registry-1.docker.io/ahsonlatif/ai-copilot:v3
+        imagePullPolicy: Always
         command:
         - uvicorn
         - router:app
         - --host
         - "0.0.0.0"
         - --port
-        - "8080"
+        - "8000"
 
         ports:
-        - containerPort: 8080
+         - containerPort: 8000
 
         envFrom:
         - configMapRef:

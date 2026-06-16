@@ -27,7 +27,7 @@ spec:
         - "--gpu-memory-utilization"
         - "0.90"
         - "--max-model-len"
-        - "256"
+        - "1024"
         - "--enforce-eager"
         - "--dtype"
         - "float16"

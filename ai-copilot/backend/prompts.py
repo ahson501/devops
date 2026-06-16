@@ -1,3 +1,5 @@
+
+
 def build_network_prompt(device, metrics):
     return f"""
 You are a senior NOC engineer.
