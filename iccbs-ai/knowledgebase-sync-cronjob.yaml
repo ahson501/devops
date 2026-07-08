@@ -1,0 +1,284 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: knowledgebase-sync-cronjob
+  namespace: ai-models
+spec:
+  schedule: "0 2 * * *"         # Daily at 2:00 AM UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: sync-worker
+            image: python:3.11-slim
+            env:
+            - name: QDRANT_URL
+              value: "http://qdrant-svc.ai-models.svc.cluster.local:6333"
+            - name: BGE_URL
+              value: "http://embedding-bge-svc.ai-models.svc.cluster.local:80"
+            command: ["python", "-c"]
+            args:
+            - |
+              import urllib.request
+              import urllib.parse
+              import urllib.error
+              import json
+              import time
+              import sys
+              import uuid
+              from datetime import datetime, timedelta
+              from xml.etree import ElementTree as ET
+              import os
+
+              # ── pip install at runtime ─────────────────────────────────────
+              import subprocess
+              subprocess.check_call([sys.executable, "-m", "pip", "install",
+                                     "qdrant-client==1.9.1", "-q"])
+              from qdrant_client import QdrantClient
+              from qdrant_client.models import Distance, VectorParams, PointStruct
+
+              QDRANT_URL  = os.environ["QDRANT_URL"]
+              BGE_URL     = os.environ["BGE_URL"]
+              VECTOR_SIZE = 1024         # BGE-large-en-v1.5 output dimension
+              MAX_CHARS   = 512          # BGE token limit (chars proxy)
+
+              # Stable UUID namespace for deterministic point IDs
+              # Same source doc always maps to same UUID → clean upserts, no duplicates
+              NS = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+
+              def make_id(source, key):
+                  """Deterministic UUID5 from source + unique key (pmid, cid, model_id)."""
+                  return str(uuid.uuid5(NS, f"{source}:{key}"))
+
+              yesterday = (datetime.utcnow() - timedelta(days=1)).strftime('%Y/%m/%d')
+              print(f"=== Knowledge Base Sync: {yesterday} ===")
+
+              # ── Qdrant client ──────────────────────────────────────────────
+              qdrant = QdrantClient(url=QDRANT_URL)
+
+              def ensure_collection(name):
+                  existing = [c.name for c in qdrant.get_collections().collections]
+                  if name not in existing:
+                      qdrant.create_collection(
+                          collection_name=name,
+                          vectors_config=VectorParams(
+                              size=VECTOR_SIZE,
+                              distance=Distance.COSINE
+                          ),
+                      )
+                      print(f"  [Qdrant] Created collection: {name}")
+                  else:
+                      print(f"  [Qdrant] Collection exists: {name}")
+
+              # ── BGE embedding ──────────────────────────────────────────────
+              def embed(text):
+                  payload = json.dumps({"inputs": text[:MAX_CHARS]}).encode()
+                  req = urllib.request.Request(
+                      f"{BGE_URL}/embed",
+                      data=payload,
+                      headers={"Content-Type": "application/json"},
+                      method="POST"
+                  )
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      return json.loads(r.read().decode())[0]
+
+              def store(collection, points):
+                  if not points:
+                      print(f"  [Qdrant] No new vectors for {collection}")
+                      return
+                  qdrant.upsert(collection_name=collection, points=points)
+                  print(f"  [Qdrant] Upserted {len(points)} vectors -> {collection}")
+
+              # ==============================================================
+              # PIPELINE 1: PUBMED
+              # ==============================================================
+              print("\n[1/3] PubMed sync...")
+              ensure_collection("pubmed")
+
+              PUBMED_TERMS = [
+                  "EGFR mutation drug resistance",
+                  "nsSNP cancer kinase",
+                  "oncology precision medicine",
+                  "cheminformatics molecular docking",
+                  "CRISPR gene therapy",
+                  "protein structure AlphaFold",
+              ]
+
+              base_eutils  = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+              pubmed_points = []
+
+              for term in PUBMED_TERMS:
+                  try:
+                      search_url = (
+                          f"{base_eutils}/esearch.fcgi"
+                          f"?db=pubmed&term={urllib.parse.quote_plus(term)}"
+                          f"&datetype=pdat&mindate={yesterday}&maxdate={yesterday}"
+                          f"&retmax=10&retmode=json"
+                      )
+                      with urllib.request.urlopen(search_url, timeout=15) as r:
+                          ids = json.loads(r.read().decode())["esearchresult"]["idlist"]
+
+                      if not ids:
+                          print(f"  No new articles for: {term}")
+                          continue
+
+                      print(f"  Found {len(ids)} articles for: {term}")
+
+                      fetch_url = (
+                          f"{base_eutils}/efetch.fcgi"
+                          f"?db=pubmed&id={','.join(ids)}"
+                          f"&rettype=abstract&retmode=xml"
+                      )
+                      with urllib.request.urlopen(fetch_url, timeout=30) as r:
+                          root = ET.fromstring(r.read().decode())
+
+                      for article in root.findall(".//PubmedArticle"):
+                          pmid     = article.findtext(".//PMID", "")
+                          title    = article.findtext(".//ArticleTitle", "")
+                          abstract = article.findtext(".//AbstractText", "")
+                          if not (pmid and title and abstract):
+                              continue
+                          vector = embed(f"{title}. {abstract}")
+                          pubmed_points.append(PointStruct(
+                              id=make_id("pubmed", pmid),
+                              vector=vector,
+                              payload={
+                                  "pmid":    pmid,
+                                  "title":   title,
+                                  "context": abstract[:1000],
+                                  "source":  "pubmed",
+                                  "term":    term,
+                                  "date":    yesterday,
+                              }
+                          ))
+                          time.sleep(0.35)
+
+                  except Exception as e:
+                      print(f"  WARNING PubMed '{term}': {e}")
+
+              store("pubmed", pubmed_points)
+
+              # ==============================================================
+              # PIPELINE 2: PUBCHEM
+              # ==============================================================
+              print("\n[2/3] PubChem sync...")
+              ensure_collection("pubchem")
+
+              PUBCHEM_TARGETS = ["EGFR", "BRCA1", "TP53", "erlotinib", "gefitinib"]
+              pubchem_points  = []
+
+              for target in PUBCHEM_TARGETS:
+                  try:
+                      cid_url = (
+                          f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound"
+                          f"/name/{urllib.parse.quote(target)}/cids/JSON"
+                      )
+                      with urllib.request.urlopen(cid_url, timeout=15) as r:
+                          cids = json.loads(r.read().decode()).get(
+                              "IdentifierList", {}).get("CID", [])[:5]
+
+                      for cid in cids:
+                          cid_str  = str(cid)
+                          desc_url = (
+                              f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound"
+                              f"/cid/{cid_str}/description/JSON"
+                          )
+                          try:
+                              with urllib.request.urlopen(desc_url, timeout=15) as r:
+                                  info  = json.loads(r.read().decode())
+                                  descs = info.get("InformationList", {}).get("Information", [])
+                                  desc  = " ".join(
+                                      d.get("Description", "") for d in descs
+                                      if d.get("Description")
+                                  )[:1000]
+                                  title = descs[0].get("Title", target) if descs else target
+                          except:
+                              desc  = f"PubChem compound CID {cid_str} for {target}"
+                              title = target
+
+                          if not desc:
+                              continue
+
+                          vector = embed(f"{title}. {desc}")
+                          pubchem_points.append(PointStruct(
+                              id=make_id("pubchem", cid_str),
+                              vector=vector,
+                              payload={
+                                  "cid":     cid_str,
+                                  "title":   title,
+                                  "context": desc,
+                                  "source":  "pubchem",
+                                  "target":  target,
+                                  "date":    yesterday,
+                              }
+                          ))
+                          time.sleep(0.5)
+
+                  except urllib.error.HTTPError as e:
+                      if e.code == 404:
+                          print(f"  No PubChem match for: {target}")
+                      else:
+                          print(f"  WARNING PubChem '{target}': {e}")
+                  except Exception as e:
+                      print(f"  WARNING PubChem '{target}': {e}")
+
+              store("pubchem", pubchem_points)
+
+              # ==============================================================
+              # PIPELINE 3: BIOMODELS
+              # ==============================================================
+              print("\n[3/3] BioModels sync...")
+              ensure_collection("biomodels")
+
+              BIOMODELS_TERMS  = ["EGFR signaling", "oncology", "cell cycle", "apoptosis"]
+              biomodels_points = []
+
+              for term in BIOMODELS_TERMS:
+                  try:
+                      bm_url = (
+                          f"https://www.ebi.ac.uk/biomodels/search"
+                          f"?query={urllib.parse.quote_plus(term)}&format=json"
+                      )
+                      with urllib.request.urlopen(bm_url, timeout=15) as r:
+                          models = json.loads(r.read().decode()).get("models", [])[:5]
+
+                      print(f"  Found {len(models)} BioModels for: {term}")
+
+                      for model in models:
+                          model_id = model.get("id", "")
+                          name     = model.get("name", "")
+                          desc     = model.get("description", "")[:800]
+                          if not (model_id and name and desc):
+                              continue
+                          vector = embed(f"{name}. {desc}")
+                          biomodels_points.append(PointStruct(
+                              id=make_id("biomodels", model_id),
+                              vector=vector,
+                              payload={
+                                  "model_id": model_id,
+                                  "title":    name,
+                                  "context":  desc,
+                                  "source":   "biomodels",
+                                  "term":     term,
+                                  "date":     yesterday,
+                              }
+                          ))
+                          time.sleep(0.3)
+
+                  except Exception as e:
+                      print(f"  WARNING BioModels '{term}': {e}")
+
+              store("biomodels", biomodels_points)
+
+              # ==============================================================
+              # SUMMARY
+              # ==============================================================
+              print("\n=== Sync Complete ===")
+              for col in ["pubmed", "pubchem", "biomodels"]:
+                  info = qdrant.get_collection(col)
+                  print(f"  {col}: {info.vectors_count} total vectors in database")

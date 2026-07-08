@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qdrant
+  namespace: ai-models
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    spec:
+      containers:
+      - name: qdrant
+        image: qdrant/qdrant:v1.15.5
+        imagePullPolicy: IfNotPresent
+
+        ports:
+        - containerPort: 6333
+          name: http
+
+        env:
+        - name: QDRANT__SERVICE__HTTP_PORT
+          value: "6333"
+
+        volumeMounts:
+        - name: qdrant-storage
+          mountPath: /qdrant/storage
+
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "2Gi"
+          limits:
+            cpu: "2"
+            memory: "8Gi"
+
+      volumes:
+      - name: qdrant-storage
+        hostPath:
+          path: /data/qdrant-storage
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qdrant-svc
+  namespace: ai-models
+spec:
+  selector:
+    app: qdrant
+  ports:
+  - name: http
+    port: 6333
+    targetPort: 6333

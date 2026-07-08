@@ -43,30 +43,60 @@ MODEL_HEALTH = {
 # =====================================================
 # SCIENTIFIC PIPELINE ROUTER
 # =====================================================
+# =====================================================
+# SCIENTIFIC PIPELINE ROUTER (FIXED FOR QDRANT & BGE)
+# =====================================================
 def route_scientific_query(user_prompt, target_model):
-    from prompts import SCIENTIFIC_RAG_TEMPLATE  # Inline to prevent lookup issues
+    from prompts import SCIENTIFIC_RAG_TEMPLATE  
 
-    if target_model == "qwen":
-        db_url = os.getenv("PUBMED_VECTOR_URL", "http://embedding-bge-svc.ai-models.svc.cluster.local:80/collections/pubmed")
-        system_role = "You are an expert Medical & Biological Research Assistant backed by PubMed."
-    elif target_model == "mistral":
-        db_url = os.getenv("PUBCHEM_VECTOR_URL", "http://embedding-bge-svc.ai-models.svc.cluster.local:80/collections/pubchem")
+    BGE_SERVICE_URL = "http://embedding-bge-svc.ai-models.svc.cluster.local:80/embed"
+    QDRANT_BASE_URL = "http://qdrant-svc.ai-models.svc.cluster.local:6333"
+
+    # 1. Inspect the incoming prompt keywords to choose the database collection
+    p = user_prompt.lower()
+    if any(x in p for x in ["molecule", "compound", "pubchem", "smiles", "drug", "docking", "inhibitor"]):
+        collection_name = "pubchem"
         system_role = "You are an expert Computational Chemist backed by PubChem molecular data."
-    elif target_model == "deepseek":
-        db_url = os.getenv("BIOMODELS_VECTOR_URL", "http://embedding-bge-svc.ai-models.svc.cluster.local:80/collections/biomodels")
+    elif any(x in p for x in ["biomodels", "sbml", "pathway", "simulation", "cellular", "signaling"]):
+        collection_name = "biomodels"
         system_role = "You are an expert Systems Biology Simulator backed by BioModels repositories."
     else:
-        return {"error": "Invalid model selection"}
+        # Default fallback collection for generalized biomedical queries
+        collection_name = "pubmed"
+        system_role = "You are an expert Medical & Biological Research Assistant backed by PubMed literature."
 
-    # Step 1: Query your local embedding service to get vector context
+    # 2. Make sure the requested model engine is valid before wasting time on vectorizing
+    if target_model not in MODELS:
+        return {"error": f"Invalid model selection: {target_model}"}
+
     retrieved_context = ""
     try:
-        vector_response = requests.post(f"{db_url}/search", json={"query": user_prompt, "top_k": 3}, timeout=5)
-        if vector_response.status_code == 200:
-            retrieved_context = vector_response.json().get("context", "")
+        # Step 1: Transform plain text prompt into a vector float array via BGE service
+        bge_response = requests.post(BGE_SERVICE_URL, json={"inputs": user_prompt[:512]}, timeout=15)
+        if bge_response.status_code != 200:
+            raise Exception(f"BGE vector generation failed with status {bge_response.status_code}")
+        
+        query_vector = bge_response.json()[0]
+
+        # Step 2: Query Qdrant with the generated vector array
+        qdrant_search_url = f"{QDRANT_BASE_URL}/collections/{collection_name}/points/search"
+        qdrant_payload = {
+            "vector": query_vector,
+            "limit": 3,
+            "with_payload": True
+        }
+        
+        qdrant_response = requests.post(qdrant_search_url, json=qdrant_payload, timeout=10)
+        if qdrant_response.status_code == 200:
+            hits = qdrant_response.json().get("result", [])
+            # Combine the abstract/description contexts stored by your CronJob pipeline
+            retrieved_context = "\n\n".join([
+                hit["payload"]["context"] for hit in hits 
+                if hit.get("payload") and "context" in hit["payload"]
+            ])
+
     except Exception as e:
-        print(f"[Warning] Failed to fetch vector context: {e}.")
-        # If database connection fails, fail safe instantly
+        print(f"[Warning] Failed vector pipeline extraction sequence: {e}.")
         return {
             "model_used": "system-guardrail",
             "response": {"status": "SUCCESS", "scientific_output": "The local institutional database does not contain this information."},
@@ -77,8 +107,6 @@ def route_scientific_query(user_prompt, target_model):
     # =====================================================
     # CRITICAL HARD CODE-LEVEL GUARDRAIL INTERCEPT
     # =====================================================
-    # If the vector database returned nothing or a generic empty payload string, 
-    # short-circuit the request immediately. Do not call the LLM.
     if not retrieved_context or len(retrieved_context.strip()) < 10:
         print(f"[ICCBS GUARDRAIL] Vector database context is empty for query. Short-circuiting execution.")
         return {
@@ -88,7 +116,7 @@ def route_scientific_query(user_prompt, target_model):
             "context_retrieved": False
         }
 
-    # Step 2: Pass prompt + retrieved context to the final model generator if data exists
+    # Step 3: Pass user prompt + retrieved context to the final vLLM target instance
     formatted_user_content = SCIENTIFIC_RAG_TEMPLATE.format(context=retrieved_context, query=user_prompt)
     endpoint = MODELS[target_model]
     real_name = MODEL_NAMES[target_model]
@@ -99,7 +127,7 @@ def route_scientific_query(user_prompt, target_model):
             {"role": "system", "content": system_role},
             {"role": "user", "content": formatted_user_content}
         ],
-        "temperature": 0.0  # Dropping to 0.0 completely eliminates creativity
+        "temperature": 0.0  
     }
 
     try:

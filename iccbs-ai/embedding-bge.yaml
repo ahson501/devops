@@ -15,9 +15,20 @@ spec:
     spec:
       containers:
       - name: bge
-        image: ghcr.io/huggingface/text-embeddings-inference:latest
+        image: ghcr.io/huggingface/text-embeddings-inference:turing-1.9
         args:
           - "--model-id"
           - "BAAI/bge-large-en-v1.5"
         ports:
         - containerPort: 80
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - mountPath: /data
+          name: model-cache
+      volumes:
+      - name: model-cache
+        hostPath:
+          path: /mnt/models/bge-large
+          type: DirectoryOrCreate
