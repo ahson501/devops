@@ -4,10 +4,10 @@ metadata:
   name: knowledgebase-sync-cronjob
   namespace: ai-models
 spec:
-  schedule: "0 2 * * *"         # Daily at 2:00 AM UTC
+  schedule: "0 2 * * *"
   concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
   jobTemplate:
     spec:
       template:
@@ -16,6 +16,7 @@ spec:
           containers:
           - name: sync-worker
             image: python:3.11-slim
+            imagePullPolicy: IfNotPresent
             env:
             - name: QDRANT_URL
               value: "http://qdrant-svc.ai-models.svc.cluster.local:6333"
@@ -35,7 +36,6 @@ spec:
               from xml.etree import ElementTree as ET
               import os
 
-              # ── pip install at runtime ─────────────────────────────────────
               import subprocess
               subprocess.check_call([sys.executable, "-m", "pip", "install",
                                      "qdrant-client==1.9.1", "-q"])
@@ -44,21 +44,17 @@ spec:
 
               QDRANT_URL  = os.environ["QDRANT_URL"]
               BGE_URL     = os.environ["BGE_URL"]
-              VECTOR_SIZE = 1024         # BGE-large-en-v1.5 output dimension
-              MAX_CHARS   = 512          # BGE token limit (chars proxy)
-
-              # Stable UUID namespace for deterministic point IDs
-              # Same source doc always maps to same UUID → clean upserts, no duplicates
+              VECTOR_SIZE = 1024
+              MAX_CHARS   = 512
               NS = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
 
               def make_id(source, key):
-                  """Deterministic UUID5 from source + unique key (pmid, cid, model_id)."""
                   return str(uuid.uuid5(NS, f"{source}:{key}"))
 
               yesterday = (datetime.utcnow() - timedelta(days=1)).strftime('%Y/%m/%d')
-              print(f"=== Knowledge Base Sync: {yesterday} ===")
+              today_label = datetime.utcnow().strftime('%Y-%m-%d')
+              print(f"=== Knowledge Base Sync: {today_label} ===")
 
-              # ── Qdrant client ──────────────────────────────────────────────
               qdrant = QdrantClient(url=QDRANT_URL)
 
               def ensure_collection(name):
@@ -66,16 +62,12 @@ spec:
                   if name not in existing:
                       qdrant.create_collection(
                           collection_name=name,
-                          vectors_config=VectorParams(
-                              size=VECTOR_SIZE,
-                              distance=Distance.COSINE
-                          ),
+                          vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
                       )
                       print(f"  [Qdrant] Created collection: {name}")
                   else:
                       print(f"  [Qdrant] Collection exists: {name}")
 
-              # ── BGE embedding ──────────────────────────────────────────────
               def embed(text):
                   payload = json.dumps({"inputs": text[:MAX_CHARS]}).encode()
                   req = urllib.request.Request(
@@ -94,6 +86,16 @@ spec:
                   qdrant.upsert(collection_name=collection, points=points)
                   print(f"  [Qdrant] Upserted {len(points)} vectors -> {collection}")
 
+              # FIX: use points_count instead of vectors_count (deprecated in 1.9.1)
+              def collection_count(name):
+                  info = qdrant.get_collection(name)
+                  count = info.points_count
+                  if count is None:
+                      # fallback: scroll with limit=0 returns total in next_page_offset
+                      result = qdrant.count(collection_name=name)
+                      count = result.count
+                  return count
+
               # ==============================================================
               # PIPELINE 1: PUBMED
               # ==============================================================
@@ -107,9 +109,11 @@ spec:
                   "cheminformatics molecular docking",
                   "CRISPR gene therapy",
                   "protein structure AlphaFold",
+                  "genomics bioinformatics sequencing",
+                  "molecular dynamics simulation",
               ]
 
-              base_eutils  = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+              base_eutils   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
               pubmed_points = []
 
               for term in PUBMED_TERMS:
@@ -141,19 +145,21 @@ spec:
                           pmid     = article.findtext(".//PMID", "")
                           title    = article.findtext(".//ArticleTitle", "")
                           abstract = article.findtext(".//AbstractText", "")
-                          if not (pmid and title and abstract):
+                          if not (pmid and title):
                               continue
-                          vector = embed(f"{title}. {abstract}")
+                          # abstract is optional — use title alone if missing
+                          text_to_embed = f"{title}. {abstract}" if abstract else title
+                          vector = embed(text_to_embed)
                           pubmed_points.append(PointStruct(
                               id=make_id("pubmed", pmid),
                               vector=vector,
                               payload={
                                   "pmid":    pmid,
                                   "title":   title,
-                                  "context": abstract[:1000],
+                                  "context": abstract[:1000] if abstract else title,
                                   "source":  "pubmed",
                                   "term":    term,
-                                  "date":    yesterday,
+                                  "date":    today_label,
                               }
                           ))
                           time.sleep(0.35)
@@ -165,12 +171,32 @@ spec:
 
               # ==============================================================
               # PIPELINE 2: PUBCHEM
+              # FIX: removed gene names (EGFR/BRCA1/TP53) — not in PubChem
+              #      replaced with actual drug/compound names
               # ==============================================================
               print("\n[2/3] PubChem sync...")
               ensure_collection("pubchem")
 
-              PUBCHEM_TARGETS = ["EGFR", "BRCA1", "TP53", "erlotinib", "gefitinib"]
-              pubchem_points  = []
+              PUBCHEM_TARGETS = [
+                  # EGFR inhibitors
+                  "erlotinib",
+                  "gefitinib",
+                  "osimertinib",
+                  "afatinib",
+                  # BRCA/DNA-damage related
+                  "olaparib",
+                  "rucaparib",
+                  # TP53/apoptosis pathway
+                  "venetoclax",
+                  "navitoclax",
+                  # General oncology drugs
+                  "imatinib",
+                  "dasatinib",
+                  # Cheminformatics reference compounds
+                  "aspirin",
+                  "methotrexate",
+              ]
+              pubchem_points = []
 
               for target in PUBCHEM_TARGETS:
                   try:
@@ -180,7 +206,7 @@ spec:
                       )
                       with urllib.request.urlopen(cid_url, timeout=15) as r:
                           cids = json.loads(r.read().decode()).get(
-                              "IdentifierList", {}).get("CID", [])[:5]
+                              "IdentifierList", {}).get("CID", [])[:3]
 
                       for cid in cids:
                           cid_str  = str(cid)
@@ -201,22 +227,22 @@ spec:
                               desc  = f"PubChem compound CID {cid_str} for {target}"
                               title = target
 
-                          if not desc:
-                              continue
-
-                          vector = embed(f"{title}. {desc}")
+                          # FIX: use compound name as fallback if no description
+                          text_to_embed = f"{title}. {desc}" if desc else title
+                          vector = embed(text_to_embed)
                           pubchem_points.append(PointStruct(
                               id=make_id("pubchem", cid_str),
                               vector=vector,
                               payload={
                                   "cid":     cid_str,
                                   "title":   title,
-                                  "context": desc,
+                                  "context": desc or title,
                                   "source":  "pubchem",
                                   "target":  target,
-                                  "date":    yesterday,
+                                  "date":    today_label,
                               }
                           ))
+                          print(f"  Stored: {target} (CID {cid_str})")
                           time.sleep(0.5)
 
                   except urllib.error.HTTPError as e:
@@ -231,41 +257,68 @@ spec:
 
               # ==============================================================
               # PIPELINE 3: BIOMODELS
+              # FIX: description is often missing — don't skip models without it
+              #      also handle alternate API response shapes
               # ==============================================================
               print("\n[3/3] BioModels sync...")
               ensure_collection("biomodels")
 
-              BIOMODELS_TERMS  = ["EGFR signaling", "oncology", "cell cycle", "apoptosis"]
+              BIOMODELS_TERMS = [
+                  "EGFR signaling",
+                  "oncology",
+                  "cell cycle",
+                  "apoptosis",
+                  "metabolic flux",
+                  "pharmacokinetics",
+              ]
               biomodels_points = []
 
               for term in BIOMODELS_TERMS:
                   try:
                       bm_url = (
                           f"https://www.ebi.ac.uk/biomodels/search"
-                          f"?query={urllib.parse.quote_plus(term)}&format=json"
+                          f"?query={urllib.parse.quote_plus(term)}&format=json&numResults=5"
                       )
                       with urllib.request.urlopen(bm_url, timeout=15) as r:
-                          models = json.loads(r.read().decode()).get("models", [])[:5]
+                          data = json.loads(r.read().decode())
+
+                      # FIX: EBI API returns models under different keys depending on version
+                      # try "models" first, then "hits", then root list
+                      models = (
+                          data.get("models") or
+                          data.get("hits") or
+                          (data if isinstance(data, list) else [])
+                      )[:5]
 
                       print(f"  Found {len(models)} BioModels for: {term}")
 
                       for model in models:
-                          model_id = model.get("id", "")
-                          name     = model.get("name", "")
-                          desc     = model.get("description", "")[:800]
-                          if not (model_id and name and desc):
+                          model_id = model.get("id") or model.get("modelId") or model.get("accession", "")
+                          name     = model.get("name") or model.get("title") or model_id
+                          # FIX: description optional — many models omit it
+                          desc     = (
+                              model.get("description") or
+                              model.get("abstract") or
+                              model.get("format", {}).get("name", "") if isinstance(model.get("format"), dict) else ""
+                          )
+                          desc = str(desc)[:800] if desc else ""
+
+                          if not model_id:
                               continue
-                          vector = embed(f"{name}. {desc}")
+
+                          # FIX: embed name alone if no description
+                          text_to_embed = f"{name}. {desc}" if desc else name
+                          vector = embed(text_to_embed)
                           biomodels_points.append(PointStruct(
                               id=make_id("biomodels", model_id),
                               vector=vector,
                               payload={
                                   "model_id": model_id,
                                   "title":    name,
-                                  "context":  desc,
+                                  "context":  desc or name,
                                   "source":   "biomodels",
                                   "term":     term,
-                                  "date":     yesterday,
+                                  "date":     today_label,
                               }
                           ))
                           time.sleep(0.3)
@@ -276,9 +329,12 @@ spec:
               store("biomodels", biomodels_points)
 
               # ==============================================================
-              # SUMMARY
+              # SUMMARY — FIX: use points_count not vectors_count
               # ==============================================================
               print("\n=== Sync Complete ===")
               for col in ["pubmed", "pubchem", "biomodels"]:
-                  info = qdrant.get_collection(col)
-                  print(f"  {col}: {info.vectors_count} total vectors in database")
+                  try:
+                      count = collection_count(col)
+                      print(f"  {col}: {count} total vectors in database")
+                  except Exception as e:
+                      print(f"  {col}: could not read count — {e}")

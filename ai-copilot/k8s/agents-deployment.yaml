@@ -1,0 +1,82 @@
+# ============================================================
+# agents-deployment.yaml
+# Place in: jupyterhub_manifests/ai-copilot/k8s/
+# Build:    podman build -f Containerfile -t agents-service:latest .
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agents-service
+  namespace: ai-gateway
+  labels:
+    app: agents-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agents-service
+  template:
+    metadata:
+      labels:
+        app: agents-service
+    spec:
+      containers:
+      - name: agents
+        # Update this image tag to match your local registry
+        # Build with: podman build -f Containerfile -t localhost/agents-service:latest .
+        # Or:         podman build -f Containerfile -t <your-registry>/agents-service:v1 .
+        image: registry-1.docker.io/ahsonlatif/aiagent:v5
+        imagePullPolicy: Always      # matches your existing model deployments
+        ports:
+        - containerPort: 8080
+        # Inherit all URLs from your existing ai-gateway-configmap.yaml
+        # (QWEN_URL, DEEPSEEK_URL, MISTRAL_URL, PUBMED_VECTOR_URL, etc.)
+        envFrom:
+        - configMapRef:
+            name: ai-gateway-config
+        env:
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: MAX_TOKENS
+          value: "1024"
+        - name: TEMPERATURE
+          value: "0.3"
+        - name: LLM_TIMEOUT
+          value: "120"
+        - name: QDRANT_TOP_K
+          value: "5"
+        - name: EMBED_URL
+          value: "http://embedding-bge-svc.ai-models.svc.cluster.local:80/embed"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agents-svc
+  namespace: ai-gateway
+spec:
+  selector:
+    app: agents-service
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  type: ClusterIP
