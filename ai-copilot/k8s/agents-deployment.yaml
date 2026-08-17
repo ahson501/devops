@@ -1,8 +1,19 @@
 # ============================================================
 # agents-deployment.yaml
 # Place in: jupyterhub_manifests/ai-copilot/k8s/
-# Build:    podman build -f Containerfile -t agents-service:latest .
 # ============================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: research-uploads-pvc
+  namespace: ai-gateway
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,15 +33,11 @@ spec:
     spec:
       containers:
       - name: agents
-        # Update this image tag to match your local registry
-        # Build with: podman build -f Containerfile -t localhost/agents-service:latest .
-        # Or:         podman build -f Containerfile -t <your-registry>/agents-service:v1 .
-        image: registry-1.docker.io/ahsonlatif/aiagent:v5
-        imagePullPolicy: Always      # matches your existing model deployments
+        image: registry-1.docker.io/ahsonlatif/aiagent:v9
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
-        # Inherit all URLs from your existing ai-gateway-configmap.yaml
-        # (QWEN_URL, DEEPSEEK_URL, MISTRAL_URL, PUBMED_VECTOR_URL, etc.)
+          name: http
         envFrom:
         - configMapRef:
             name: ai-gateway-config
@@ -47,6 +54,8 @@ spec:
           value: "5"
         - name: EMBED_URL
           value: "http://embedding-bge-svc.ai-models.svc.cluster.local:80/embed"
+        - name: UPLOAD_DIR
+          value: "/data/research-uploads"
         resources:
           requests:
             memory: "256Mi"
@@ -54,6 +63,9 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+        volumeMounts:
+        - name: upload-storage
+          mountPath: /data/research-uploads
         readinessProbe:
           httpGet:
             path: /
@@ -66,6 +78,10 @@ spec:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 20
+      volumes:
+      - name: upload-storage
+        persistentVolumeClaim:
+          claimName: research-uploads-pvc
 ---
 apiVersion: v1
 kind: Service
