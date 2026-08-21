@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: agents
-        image: registry-1.docker.io/ahsonlatif/aiagent:v9
+        image: registry-1.docker.io/ahsonlatif/aiagent:v11
         imagePullPolicy: Always
         ports:
         - containerPort: 8080

@@ -6,6 +6,7 @@ Exposes a single /agents/chat endpoint that orchestrates all specialist agents.
 
 import logging
 import os
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List
@@ -17,6 +18,8 @@ from pydantic import BaseModel, Field
 
 from orchestrator import detect_agent, model_for_agent, model_name_for_agent
 from agents import research_agent, bioinfo_agent
+# Future Agent Imports (Uncomment as you build them):
+# from agents import chemistry_agent, coding_agent, statistics_agent
 
 
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "/data/research-uploads"))
@@ -162,7 +165,7 @@ async def agent_chat(req: AgentChatRequest):
     """
     Main agent endpoint.
     1. Detect intent → select agent
-    2. Dispatch to specialist agent
+    2. Dispatch to specialist agent (or research_agent if file path detected)
     3. Return grounded answer with sources
     """
     history = [t.model_dump() for t in req.history]
@@ -176,27 +179,37 @@ async def agent_chat(req: AgentChatRequest):
 
     logger.info("Agent=%s model=%s message='%s...'", agent, model_name, req.message[:80])
 
-    # Dispatch to appropriate agent execution layer
     try:
-        if agent == "research":
+        # ── 1. FILE ACCESS ROUTING OVERRIDE ──────────────────────────────────────
+        # If the user references a path in /data/research-uploads/, route to
+        # research_agent.py so it extracts file content regardless of detected intent.
+        has_file_path = bool(re.search(r'/data/research-uploads/[\w\-\. ]+', req.message))
+
+        if has_file_path or agent == "research":
             result = await research_agent.run(req.message, history, model_url, model_name)
+
+        # ── 2. SPECIALIST AGENTS WORKFLOW ───────────────────────────────────────
         elif agent == "bioinfo":
             result = await bioinfo_agent.run(req.message, history, model_url, model_name)
+
         # elif agent == "chemistry":
         #     result = await chemistry_agent.run(req.message, history, model_url, model_name)
+
         # elif agent == "coding":
         #     result = await coding_agent.run(req.message, history, model_url, model_name)
+
         # elif agent == "statistics":
         #     result = await statistics_agent.run(req.message, history, model_url, model_name)
+
+        # ── 3. GENERAL FALLBACK (Direct LLM call for unbuilt agents) ─────────────
         else:
-            # General fallback — direct LLM call, no RAG
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
                     f"{model_url}/v1/chat/completions",
                     json={
                         "model": model_name,
                         "messages": [
-                            {"role": "system", "content": "You are a helpful scientific assistant."},
+                            {"role": "system", "content": f"You are an expert {agent} scientific assistant."},
                             *history[-6:],
                             {"role": "user", "content": req.message},
                         ],
@@ -207,7 +220,7 @@ async def agent_chat(req: AgentChatRequest):
                 )
                 resp.raise_for_status()
                 answer = resp.json()["choices"][0]["message"]["content"]
-            result = {"answer": answer, "sources": [], "agent": "general", "model": model_name, "context_hits": {}}
+            result = {"answer": answer, "sources": [], "agent": agent, "model": model_name, "context_hits": {}}
 
     except httpx.HTTPStatusError as e:
         logger.error("LLM backend error: %s", e)
